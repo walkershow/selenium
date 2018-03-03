@@ -304,7 +304,7 @@ class ChinaUSearch(prototype):
         top = self.browser.execute_script(
             '''function getElementViewTop(element){var actualTop=element.offsetTop;var current=element.offsetParent;while(current!==null){actualTop+=current.offsetTop;current=current.offsetParent}if(document.compatMode=="BackCompat"){var elementScrollTop=document.body.scrollTop}else{var elementScrollTop=document.documentElement.scrollTop}return actualTop-elementScrollTop};return getElementViewTop(arguments[0])''',
             title)
-        self.click_mode.click(top, left,a_tag, 2)
+        self.click_mode.click(top, left,a_tag, self.cm)
         # 修正位置
         # step = random.randint(20, 150)
         # top += 110

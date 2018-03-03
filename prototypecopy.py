@@ -96,7 +96,7 @@ class prototype(object):
 #            return res[0]["useragent"]
 
     def get_information(self):
-        sql = "select server_id, vm_id, cur_task_id, cur_profile_id, task_group_id,user_type,terminal_type,standby_time,timeout, copy_cookie from vm_cur_task where id = {id}".format(id = self.task_cur_id)
+        sql = "select server_id, vm_id, cur_task_id, cur_profile_id, task_group_id,user_type,terminal_type,standby_time,timeout, copy_cookie,click_mode from vm_cur_task where id = {id}".format(id = self.task_cur_id)
         #sql = "select server_id, vm_id, cur_task_id, cur_profile_id, task_group_id  from vm_cur_task where id = {id}".format(id=self.task_cur_id)
         res = self.db.select_sql(sql, 'DictCursor')
         if res is None or len(res) == 0:
@@ -117,6 +117,7 @@ class prototype(object):
         self.standby_time = res[0]["standby_time"]
         self.timeout = res[0]["timeout"]
         self.copy_cookie = res[0]["copy_cookie"]
+        self.cm= res[0]["click_mode"]
 
     def getip(self):
         try:

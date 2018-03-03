@@ -51,7 +51,7 @@ class ClickMode(object):
         top += 110
         left += step
         self.write_position(left,top)
-        os.system(self.jb_path)
+        os.system("d:\\selenium\\test.bat")
     
     def click_by_autogui(self, top, left):
         ran = random.randint(1, 7)

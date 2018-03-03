@@ -34,11 +34,8 @@ import multiprocessing
 import Queue
 import psutil
 import shutil
-import win32gui
-import win32process
-import win32api
-import win32con
-import cPickle as pickle
+from click_mode import ClickMode
+from input_mode import InputMode
 myprint = Color()
 workpath = os.getcwd()
 
@@ -102,9 +99,12 @@ class ChinaUSearch(prototype):
                 self.logger.error("can't get information profile_path")
             self.origin_profile = res[0]['path']
             print self.origin_profile
-            fp = webdriver.FirefoxProfile(self.origin_profile)
+            #fp = webdriver.FirefoxProfile(self.origin_profile)
             #fp.set_preference('permissions.default.image', 2)
-            self.browser = webdriver.Firefox(fp)
+            self.browser = webdriver.Firefox()
+            #self.browser = webdriver.Chrome()
+            self.click_mode=ClickMode(self.browser, "d:\\selenium\\000.jb")
+            self.input_mode=InputMode(self.browser)
             # self.profile_path = []
             # temp_folder = os.listdir("D:\\profile")
             # target = mapping[str(self.profile_type)]
@@ -122,37 +122,6 @@ class ChinaUSearch(prototype):
             self.set_task_status(9)  # 任务提供的profileid 的path为NULL
             self.q.put(0)
             sys.exit(1)
-
-
-    def input_pinyin(self,kw,keyword,kwid):
-        for word in keyword:
-            for w in lazy_pinyin(word)[0]:
-                kw.send_keys(w)
-                sleep(random.uniform(0.2, 1.5))
-            js = ''' function replace_last_str(origin_str, target_str, replace_str){
-                        var index = origin_str.lastIndexOf(target_str);
-                        return origin_str.substr(0, index) + replace_str + origin_str.substr(index + target_str.length);
-                    }
-                    value = document.getElementById("{kwid}").value;
-                    document.getElementById("{kwid}").value = replace_last_str(value, "{origin}", "{replace_str}")
-                '''
-            js = js.replace("{origin}", lazy_pinyin(word)[0]).replace("{replace_str}", word).replace("{kwid}",kwid)
-            self.browser.execute_script(js)
-
-    def input_wubi(self,kw,keyword,kwid):
-        for word in keyword:
-            for w in wubi.get(word,'cw'):
-                kw.send_keys(w)
-                sleep(random.uniform(0.2, 1.5))
-            js = ''' function replace_last_str(origin_str, target_str, replace_str){
-                        var index = origin_str.lastIndexOf(target_str);
-                        return origin_str.substr(0, index) + replace_str + origin_str.substr(index + target_str.length);
-                    }
-                    value = document.getElementById("{kwid}").value;
-                    document.getElementById("{kwid}").value = replace_last_str(value, "{origin}", "{replace_str}")
-                '''
-            js = js.replace("{origin}",  wubi.get(word, 'cw')).replace("{replace_str}", word).replace("{kwid}",kwid)
-            self.browser.execute_script(js)
 
 
     #搜狗搜索
@@ -215,11 +184,7 @@ class ChinaUSearch(prototype):
             self.update_db_log()
             self.success_add()
             input_block = self.browser.find_element_by_xpath('''//*[@id="kw"]''')
-            randnum = random.randint(0,1)
-            if randnum == 0:
-                self.input_pinyin(input_block,keyword,"kw")
-            elif randnum == 1:
-                self.input_wubi(input_block,keyword,"kw")
+            self.input_mode.input(input_block, keyword, "kw")
             input_block.send_keys(Keys.ENTER)
             sleep(2)
             if self.random_click_on_page(num):
@@ -239,11 +204,7 @@ class ChinaUSearch(prototype):
             self.browser.get('''http://www.chinaso.com/''')
             sleep(1)
             input_block = self.browser.find_element_by_xpath('''//*[@id="q"]''')
-            randnum = random.randint(0,1)
-            if randnum == 0:
-                self.input_pinyin(input_block,keyword,"q")
-            elif randnum == 1:
-                self.input_wubi(input_block,keyword,"q")
+            self.input_mode.input(input_block, keyword, "q")
             input_block.send_keys(Keys.ENTER)
             if self.random_click_on_page(num):
                 for i in range(random.randint(1,3)):
@@ -262,11 +223,7 @@ class ChinaUSearch(prototype):
             self.browser.get('''https://www.bing.com/''')
             sleep(1)
             input_block = self.browser.find_element_by_xpath('''//*[@id="sb_form_q"]''')
-            randnum = random.randint(0, 1)
-            if randnum == 0:
-                self.input_pinyin(input_block, keyword, "sb_form_q")
-            elif randnum == 1:
-                self.input_wubi(input_block, keyword, "sb_form_q")
+            self.input_mode.input(input_block, keyword, "sb_form_q")
             input_block.send_keys(Keys.ENTER)
             if self.random_click_on_page(num):
                 for i in range(random.randint(1, 3)):
@@ -285,11 +242,7 @@ class ChinaUSearch(prototype):
             self.browser.get('''https://www.yahoo.com/''')
             sleep(1)
             input_block = self.browser.find_element_by_xpath('''//*[@id="uh-search-box"]''')
-            randnum = random.randint(0, 1)
-            if randnum == 0:
-                self.input_pinyin(input_block, keyword, "uh-search-box")
-            elif randnum == 1:
-                self.input_wubi(input_block, keyword, "uh-search-box")
+            self.input_mode.input(input_block, keyword, "uh-search-box")
             input_block.send_keys(Keys.ENTER)
             if self.random_click_on_page(num):
                 for i in range(random.randint(1, 3)):

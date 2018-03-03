@@ -105,7 +105,8 @@ class Engine(object):
         try:
            # randnum = random.randint(0, len(self.profile_path) - 1)  # 选择随机浏览器
             print(self.profile_path)#[randnum])
-            fp = webdriver.FirefoxProfile(self.profile_path) #设置浏览器配置文件位置
+            #fp = webdriver.FirefoxProfile(self.profile_path) #设置浏览器配置文件位置
+            fp = webdriver.FirefoxProfile() #设置浏览器配置文件位置
             print('select path')
             self.browser = webdriver.Firefox(fp)
             print('set firefox')
@@ -113,7 +114,7 @@ class Engine(object):
             #print('set timeout')
             return 0
         except TimeoutException, e:
-            logger.error(u'初始浏览器超时:' + str(e.msg))
+            logger.error(u'初始浏览器超时:' + str(e.message))
             return -1
         except Exception, e:
             logger.error(u'初始浏览器失败:' + str(e.message))
@@ -125,7 +126,7 @@ class Engine(object):
             windows = self.browser.window_handles
             self.browser.switch_to.window(windows[-1])
         except Exception, e:
-            logger.error(u'客户广告页动作错误:' + str(e.msg))
+            logger.error(u'客户广告页动作错误:' + str(e.message))
 
     def GoToIndexPage(self,url):
         logger.debug(u"打开首页")
@@ -136,7 +137,7 @@ class Engine(object):
         except TimeoutException, e:
             return 0
         except Exception, e:
-            logger.error(u'打开首页错误:' + str(e.msg))
+            logger.error(u'打开首页错误:' + str(e.message))
             return -1
 
     def OpenListUrl(self,select):
@@ -151,7 +152,7 @@ class Engine(object):
             #self.switch_to_new_windows()
             return 0
         except Exception , e:
-            logger.error(u'打开列表页错误:' + str(e.msg))
+            logger.error(u'打开列表页错误:' + str(e.message))
             return -1
 
     def GetDetailUrl(self,select,div):#取得详细页URL(加多一个div做为另一种情况，点不到select部分就点div部分)
@@ -177,7 +178,7 @@ class Engine(object):
          #       self.detialpage_url.append(tt)
             return 0
         except Exception , e:
-            logger.error(u'取得详细页URL错误:' + str(e.msg))
+            logger.error(u'取得详细页URL错误:' + str(e.message))
             return -1
        
     def OpenDetialPage(self):#随机打开一条详细页
@@ -209,10 +210,10 @@ class Engine(object):
             #self.Process_360SearchPage()
             return 0
         except TimeoutException, e:
-            logger.debug(u'打开详细页超时:' + str(e.msg))
+            logger.debug(u'打开详细页超时:' + str(e.message))
             return -1
         except Exception, e:
-            logger.error(u'打开详细页错误:' + str(e.msg))
+            logger.error(u'打开详细页错误:' + str(e.message))
             return -1
 
     def GetAllAdUrl(self,iframeindex,iframename,adhref): #取得所有广告URL，存放 ad_url[]里
@@ -263,7 +264,7 @@ class Engine(object):
                 print(u'详细页中,找不到广告内容')
             return 0
         except Exception, e:
-            logger.error(u'取详细页所有广告URL错误:' + str(e.msg))
+            logger.error(u'取详细页所有广告URL错误:' + str(e.message))
             return -1
 
 
@@ -279,10 +280,10 @@ class Engine(object):
             #self.switch_to_new_windows()
             return 0
         except TimeoutException, e:
-            logger.debug(u"打开一条广告超时:" + str(e.msg))
+            logger.debug(u"打开一条广告超时:" + str(e.message))
             return -1
         except Exception, e:
-            logger.error(u'打开一条广告错误:' + str(e.msg))
+            logger.error(u'打开一条广告错误:' + str(e.message))
             return -1
 
     def Process_360SearchPage(self):#360搜索页中的动作
@@ -313,10 +314,10 @@ class Engine(object):
                     endtime = endtime-i
             return 0
         except TimeoutException, e:
-            logger.debug(u'360搜索页操作超时:' + str(e.msg))
+            logger.debug(u'360搜索页操作超时:' + str(e.message))
             return -1
         except Exception, e:
-            logger.error(u'360搜索页操作错误:' + str(e.msg))
+            logger.error(u'360搜索页操作错误:' + str(e.message))
             return -1
 
     def Open360ClientAdPage(self,select):#打开客户广告页面
@@ -342,10 +343,10 @@ class Engine(object):
             self.browser.maximize_window()#最大化浏览器窗口
             return 0
         except TimeoutException, e:
-            logger.debug(u'打开客户广告页超时:' + str(e.msg))
+            logger.debug(u'打开客户广告页超时:' + str(e.message))
             return -1
         except Exception, e:
-            logger.error(u'打开客户广告页错误:' + str(e.msg))
+            logger.error(u'打开客户广告页错误:' + str(e.message))
             return -1
 
         return 0
@@ -360,10 +361,10 @@ class Engine(object):
             self.RandomMoveMouse()
             return 0
         except TimeoutException, e:
-            logger.debug(u'客户广告页动作超时:' + str(e.msg))
+            logger.debug(u'客户广告页动作超时:' + str(e.message))
             return -1
         except Exception, e:
-            logger.error(u'客户广告页动作错误:' + str(e.msg))
+            logger.error(u'客户广告页动作错误:' + str(e.message))
             return -1
 
     def RandomMoveMouse(self):  # 让鼠标朝目录曲线移动，这个随机移动是可调整的，看实际情况变动
@@ -418,7 +419,7 @@ class Engine(object):
              #       self.browser.switch_to_window(win)
              #       self.browser.close()
             except Exception, e:
-                logger.error(u'关闭浏览器错误:' + str(e.msg))
+                logger.error(u'关闭浏览器错误:' + str(e.message))
           #  self.browser.close()
             logger.debug(u"关闭浏览器")
 
@@ -530,7 +531,7 @@ def main():
         logging.getLogger('').addHandler(console)
     except Exception, e:
         pass
-    logging.config.fileConfig("logger.conf")
+    logging.config.fileConfig("log_conf/6aks.log.conf")
     logger = logging.getLogger("example02")
 
     logger.debug(u'启动程序')

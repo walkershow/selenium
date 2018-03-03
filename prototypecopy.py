@@ -21,7 +21,7 @@ import re
 from time import sleep
 import os
 import sys
-from ua import get_pc_ua, get_phone_ua
+#from ua import get_pc_ua, get_phone_ua
 from ColorPrint import Color
 from sys_clean import SysClean
 
@@ -79,21 +79,21 @@ class prototype(object):
 
 
 
-    def get_phone_ua(self):
-        sql = "select useragent from firefox_ua where type = 2"
-        res = self.db.select_sql(sql, "DictCursor")
-        if not res or len(res) == 0:
-            return get_phone_ua(1)
-        else:
-            return res[0]["useragent"]
-
-    def get_pc_ua(self):
-        sql = "select useragent from firefox_ua where type = 1"
-        res = self.db.select_sql(sql, "DictCursor")
-        if not res or len(res) == 0:
-            return get_pc_ua(1)
-        else:
-            return res[0]["useragent"]
+#    def get_phone_ua(self):
+#        sql = "select useragent from firefox_ua where type = 2"
+#        res = self.db.select_sql(sql, "DictCursor")
+#        if not res or len(res) == 0:
+#            return get_phone_ua(1)
+#        else:
+#            return res[0]["useragent"]
+#
+#    def get_pc_ua(self):
+#        sql = "select useragent from firefox_ua where type = 1"
+#        res = self.db.select_sql(sql, "DictCursor")
+#        if not res or len(res) == 0:
+#            return get_pc_ua(1)
+#        else:
+#            return res[0]["useragent"]
 
     def get_information(self):
         sql = "select server_id, vm_id, cur_task_id, cur_profile_id, task_group_id,user_type,terminal_type,standby_time,timeout, copy_cookie from vm_cur_task where id = {id}".format(id = self.task_cur_id)

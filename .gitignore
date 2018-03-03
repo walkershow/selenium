@@ -1,0 +1,4 @@
+#filter pyc,log file
+*.pyc
+/log/
+*.log

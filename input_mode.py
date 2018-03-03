@@ -44,9 +44,9 @@ class InputMode(object):
         if brand:
             mode = random.randint(0, 1)
         if mode == 0:
-            self.input_pinyin(input_block, keyword, "kw")
+            self.input_pinyin(input_block, keyword, kwid)
         elif mode == 1:
-            self.input_wubi(input_block, keyword, "kw")
+            self.input_wubi(input_block, keyword, kwid)
     
 class PinYinWord(object):
     def __init__(self, string, wubi_status = False):

@@ -70,6 +70,7 @@ class ClickMode(object):
             print "click by zhixing"
             self.click_by_zhixing(top, left)
         elif mode == 2:
+            print "click by autogui"
             self.click_by_autogui(top, left) 
         else:
             print "click by script"

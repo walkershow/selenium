@@ -105,8 +105,8 @@ class Engine(object):
         try:
            # randnum = random.randint(0, len(self.profile_path) - 1)  # 选择随机浏览器
             print(self.profile_path)#[randnum])
-            #fp = webdriver.FirefoxProfile(self.profile_path) #设置浏览器配置文件位置
-            fp = webdriver.FirefoxProfile() #设置浏览器配置文件位置
+            fp = webdriver.FirefoxProfile(self.profile_path) #设置浏览器配置文件位置
+            # fp = webdriver.FirefoxProfile() #设置浏览器配置文件位置
             print('select path')
             self.browser = webdriver.Firefox(fp)
             print('set firefox')

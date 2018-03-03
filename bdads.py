@@ -119,12 +119,10 @@ class ChinaUSearch(prototype):
             res = self.db.select_sql(sql, 'DictCursor')
             if res is None or len(res) == 0:
                 self.logger.error("can't get information profile_path")
-            opties = Options()
-            opties.log.level = 'trace'
             self.origin_profile = res[0]['path']
             print self.origin_profile
-            # fp = webdriver.FirefoxProfile(self.origin_profile)
-            self.browser = webdriver.Chrome()
+            fp = webdriver.FirefoxProfile(self.origin_profile)
+            self.browser = webdriver.Firefox(fp)
             # self.browser = webdriver.Firefox(log_path='d:\\geckodriver.log')
 
             self.click_mode=ClickMode(self.browser, "d:\\selenium\\000.jb")
@@ -140,7 +138,7 @@ class ChinaUSearch(prototype):
             # self.origin_profile = profile[0]
             # fp = webdriver.FirefoxProfile(profile[0])
             # self.browser = webdriver.Firefox(fp)
-            #self.browser.maximize_window()
+            self.browser.maximize_window()
         # except Exception, e:
         #     print "the webdriver config failed,{0}".format(e)
         #     self.set_task_status(9) #任务提供的profileid 的path为NULL
@@ -306,7 +304,7 @@ class ChinaUSearch(prototype):
         top = self.browser.execute_script(
             '''function getElementViewTop(element){var actualTop=element.offsetTop;var current=element.offsetParent;while(current!==null){actualTop+=current.offsetTop;current=current.offsetParent}if(document.compatMode=="BackCompat"){var elementScrollTop=document.body.scrollTop}else{var elementScrollTop=document.documentElement.scrollTop}return actualTop-elementScrollTop};return getElementViewTop(arguments[0])''',
             title)
-        self.click_mode.click(top, left,a_tag, 3)
+        self.click_mode.click(top, left,a_tag, 2)
         # 修正位置
         # step = random.randint(20, 150)
         # top += 110
@@ -330,7 +328,7 @@ class ChinaUSearch(prototype):
                 top = self.browser.execute_script('''function getElementViewTop(element){var actualTop=element.offsetTop;var current=element.offsetParent;while(current!==null){actualTop+=current.offsetTop;current=current.offsetParent}if(document.compatMode=="BackCompat"){var elementScrollTop=document.body.scrollTop}else{var elementScrollTop=document.documentElement.scrollTop}return actualTop-elementScrollTop};return getElementViewTop(arguments[0])''', a)
                 top += 95 + 5
                 left += 20 + 20
-                self.click_mode.click(left, top, a, 3)
+                self.click_mode.click(left, top, a, 2)
                 # pyautogui.moveTo(left, top, duration=6)
                 # pyautogui.click()
                 sleep(3)

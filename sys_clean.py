@@ -9,11 +9,15 @@ if sys.platform == 'win32':
     import win32process
     import win32api
     import win32con
+    import ctypes  
 
 myprint = Color()
 
 
 class SysClean(object):
+    def __init__(self, logger):
+        self.logger = logger
+
     def startup_check(self):
         '''检测是否出现错误窗口,存在则清除相关进程
         '''

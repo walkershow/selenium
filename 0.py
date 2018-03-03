@@ -99,9 +99,9 @@ class ChinaUSearch(prototype):
                 self.logger.error("can't get information profile_path")
             self.origin_profile = res[0]['path']
             print self.origin_profile
-            #fp = webdriver.FirefoxProfile(self.origin_profile)
+            fp = webdriver.FirefoxProfile(self.origin_profile)
             #fp.set_preference('permissions.default.image', 2)
-            self.browser = webdriver.Firefox()
+            self.browser = webdriver.Firefox(fp)
             #self.browser = webdriver.Chrome()
             self.click_mode=ClickMode(self.browser, "d:\\selenium\\000.jb")
             self.input_mode=InputMode(self.browser)
@@ -132,11 +132,7 @@ class ChinaUSearch(prototype):
             self.update_db_log()
             self.success_add()
             input_block = self.browser.find_element_by_xpath('''//*[@id="query"]''')
-            randnum = random.randint(0,1)
-            if randnum == 0:
-                self.input_pinyin(input_block,keyword,"query")
-            elif randnum == 1:
-                self.input_wubi(input_block,keyword,"query")
+            self.input_mode.input(input_block, keyword, "query")
             input_block.send_keys(Keys.ENTER)
             sleep(2)
             if self.random_click_on_page(num):
@@ -158,11 +154,7 @@ class ChinaUSearch(prototype):
             self.update_db_log()
             self.success_add()
             input_block = self.script.find_elem("id","input")
-            randnum = random.randint(0,1)
-            if randnum == 0:
-                self.input_pinyin(input_block,keyword,"input")
-            elif randnum == 1:
-                self.input_wubi(input_block,keyword,"input")
+            self.input_mode.input(input_block, keyword, "input")
             input_block.send_keys(Keys.ENTER)
             sleep(2)
             if self.random_click_on_page(num):
@@ -479,40 +471,42 @@ def run():
     if ret:
         keyword = ret[0]['keyword'].decode("utf8")
         pids = psutil.pids()
-        try:
-            engine = ChinaUSearch(logger, db, taskid, q ,pids)
-            usertype = engine.user_type
-            if usertype == 0:
-                flag = engine.baidu_search(keyword, usertype)
-            elif usertype == 1:
-                flag = engine.so_search(keyword, usertype)
-            elif usertype == 2:
-                flag = engine.sogou_search(keyword, usertype)
-            elif usertype == 3:
-                flag = engine.china_search(keyword, usertype)
-            elif usertype == 4:
-                flag = engine.bing_search(keyword, usertype)
-            elif usertype == 5:
-                flag = engine.yahoo_search(keyword, usertype)
-            if flag:
-                sleep(10)
-                myprint.print_green_text(u"引擎:子任务完成，准备更新数据库状态")
-                engine.task_finished()
-                myprint.print_green_text(u"引擎:成功更新数据库，准备退出")
-            else:
-                myprint.print_red_text(u"引擎:搜索失败")
-                engine.task_failed()
-                return
-            sleep(engine.standby_time * 60)
-            engine.task_wait_finished()
-            engine.quit()
+        # try:
+        engine = ChinaUSearch(logger, db, taskid, q ,pids)
+        usertype = engine.user_type
+        if usertype == 0:
+            flag = engine.baidu_search(keyword, usertype)
+        elif usertype == 1:
+            flag = engine.so_search(keyword, usertype)
+        elif usertype == 2:
+            flag = engine.sogou_search(keyword, usertype)
+        elif usertype == 3:
+            flag = engine.china_search(keyword, usertype)
+        elif usertype == 4:
+            flag = engine.bing_search(keyword, usertype)
+        elif usertype == 5:
+            flag = engine.yahoo_search(keyword, usertype)
+        if flag:
             sleep(10)
-            myprint.print_green_text(u"引擎:任务完成，正常退出")
-            q.put(1)
-        except Exception, e:
-            logger.error(u"搜索异常，引擎崩溃! {0}".format(e))
-            myprint.print_red_text(u"引擎:搜索引擎崩溃")
-            engine.closebroswer()
+            myprint.print_green_text(u"引擎:子任务完成，准备更新数据库状态")
+            engine.task_finished()
+            myprint.print_green_text(u"引擎:成功更新数据库，准备退出")
+        else:
+            myprint.print_red_text(u"引擎:搜索失败")
+            engine.task_failed()
+            return
+        myprint.print_green_text(u"引擎:进入待机:%d s"%(engine.standby_time*60))
+        sleep(engine.standby_time * 60)
+        myprint.print_green_text(u"引擎:待机完成")
+        engine.task_wait_finished()
+        engine.quit()
+        sleep(10)
+        myprint.print_green_text(u"引擎:任务完成，正常退出")
+        q.put(1)
+        # except Exception, e:
+        #     logger.error(u"搜索异常，引擎崩溃! {0}".format(e))
+        #     myprint.print_red_text(u"引擎:搜索引擎崩溃")
+        #     engine.closebroswer()
 
 
 def main():

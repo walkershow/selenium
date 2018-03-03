@@ -37,7 +37,7 @@ class prototype(object):
         self.q = q
         self.wait_stauts = False
         self.get_information()
-        self.sys_clean=SysClean()
+        self.sys_clean=SysClean(logger)
         self.sys_clean.startup_check()
         # self.startup_check()
         self.total_time_mutex = threading.Lock()
@@ -232,7 +232,7 @@ class prototype(object):
         params.update(kwargs)
         oprcode = self.get_oprcode_bytask()
         self.log_task_timepoint(oprcode, params)
-        self.send_ctime()
+        # self.send_ctime()
 
     def log_task_timepoint(self, oprcode, params):
         ip = self.getip()

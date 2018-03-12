@@ -29,7 +29,7 @@ myprint = Color()
 
 
 class prototype(object):
-    def __init__(self, logger,db,task_cur_id,q,pids):
+    def __init__(self, logger,db,task_cur_id,q,pids, is_debug_mode):
         self.task_cur_id = task_cur_id
         self.logger = logger
         self.db = db
@@ -44,8 +44,10 @@ class prototype(object):
         self.total_time = 0
         self.is_running = True
         self.browser = None
-        t = threading.Timer(60, self.time_counter,(q,))
-        t.start()
+        self.is_debug_mode = is_debug_mode
+        if self.is_debug_mode == 0:
+            t = threading.Timer(60, self.time_counter,(q,))
+            t.start()
 
 
     def time_counter(self,q):
@@ -61,7 +63,7 @@ class prototype(object):
             # self.showpids(self.pids)
             if res < 0:
                 self.logger.error("update ran_times error")
-            if self.is_running == True and self.total_time > self.timeout:
+            if self.total_time > self.timeout:
                 myprint.print_red_text(u"引擎:任务超时, 开始杀死引擎")
                 self.sys_clean.closebroswer()
                 # self.closebroswer()

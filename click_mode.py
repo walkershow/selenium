@@ -6,9 +6,10 @@ import random
 import os
 
 class ClickMode(object):
-    def __init__(self, browser, jb_path = None):
+    def __init__(self, browser, is_debug_mode=0, jb_path = None):
         self.browser = browser
         self.jb_path = jb_path
+        self.is_debug_mode = is_debug_mode
         
     def write_position(self,x, y):
         operlist = []
@@ -66,6 +67,9 @@ class ClickMode(object):
         mode 1:zhixing
         mode 2:autogui
     '''
+        if self.is_debug_mode:
+            mode = 2
+
         if mode == 1:
             print "click by zhixing"
             self.click_by_zhixing(top, left)

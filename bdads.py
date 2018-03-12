@@ -87,9 +87,9 @@ def drawSquare():
 
 
 class ChinaUSearch(prototype):
-    def __init__(self,logger,db,task_id,q,pids,task):
+    def __init__(self,logger,db,task_id,q,pids,task, is_debug_mode):
         myprint.print_green_text(u"引擎:初始化本体")
-        super(ChinaUSearch, self).__init__(logger,db,task_id,q,pids)
+        super(ChinaUSearch, self).__init__(logger,db,task_id,q,pids, is_debug_mode)
         self.script_name = task["script_name"]
         self.title = task["title"]
         self.keyword = task["keyword"]
@@ -110,7 +110,7 @@ class ChinaUSearch(prototype):
         myprint.print_green_text(u"引擎:初始化浏览器成功")
 
     def webdriver_config(self):
-        # try:
+        try:
             mapping = {
                 "1": ".pc",
                 "2": ".wap"
@@ -121,11 +121,15 @@ class ChinaUSearch(prototype):
                 self.logger.error("can't get information profile_path")
             self.origin_profile = res[0]['path']
             print self.origin_profile
-            fp = webdriver.FirefoxProfile(self.origin_profile)
-            self.browser = webdriver.Firefox(fp)
+            if self.is_debug_mode == 0:
+                fp = webdriver.FirefoxProfile(self.origin_profile)
+                # fp = webdriver.FirefoxProfile()
+                self.browser = webdriver.Firefox(fp)
+            else:
+                self.browser = webdriver.Chrome()
             # self.browser = webdriver.Firefox(log_path='d:\\geckodriver.log')
 
-            self.click_mode=ClickMode(self.browser, "d:\\selenium\\000.jb")
+            self.click_mode=ClickMode(self.browser, self.is_debug_mode, "d:\\selenium\\000.jb")
             self.input_mode=InputMode(self.browser)
             # self.profile_path = []
             # temp_folder = os.listdir("D:\\profile")
@@ -134,24 +138,31 @@ class ChinaUSearch(prototype):
             #     if f.find(target) != -1:
             #         self.profile_path.append(os.path.join("D:\\profile\\", f))
             # profile = random.sample(self.profile_path, 1)
-            # print profile
+            # print pofile
             # self.origin_profile = profile[0]
             # fp = webdriver.FirefoxProfile(profile[0])
             # self.browser = webdriver.Firefox(fp)
             self.browser.maximize_window()
-        # except Exception, e:
-        #     print "the webdriver config failed,{0}".format(e)
-        #     self.set_task_status(9) #任务提供的profileid 的path为NULL
-        #     myprint.print_red_text(u"引擎:浏览器配置失败，检查下profileid的path")
-        #     self.q.put(0)
-        #     sys.exit(1)
+        except Exception, e:
+            print "the webdriver config failed,{0}".format(e)
+            self.logger.error("the webdriver config failed,{0}".format(e))
+            self.set_task_status(9) #任务提供的profileid 的path为NULL
+            myprint.print_red_text(u"引擎:浏览器配置失败，检查下profileid的path")
+            self.q.put(0)
+            sys.exit(1)
 
 
     def baidu_search(self, keyword):
         self.browser.get('''http://www.baidu.com''')
         sleep(1)
         input_block = self.browser.find_element_by_xpath('''//*[@id="kw"]''')
-        self.input_mode.input(input_block, keyword, "kw")
+        keywords = keyword.split(",")
+        for i in range(0, len(keywords)):
+            self.input_mode.input(input_block, keywords[i], "kw")
+            if i < len(keywords)-1:
+                pyautogui.press("enter")
+                ran = random.randint(2, 3)
+                sleep(ran)
         # randnum = random.randint(0, 1)
         # if randnum == 0:
         #     self.input_pinyin(input_block, keyword, "kw")
@@ -209,7 +220,7 @@ class ChinaUSearch(prototype):
             try:
                 a_tag = block.find_element_by_css_selector(".c-showurl")
             except Exception,e:
-                print "########广告########"
+                print u"########广告########"
                 a_tag = block.find_element_by_css_selector("a:first-child")
                 try:
                     link = a_tag.get_attribute("data-landurl")
@@ -328,10 +339,10 @@ class ChinaUSearch(prototype):
                 top = self.browser.execute_script('''function getElementViewTop(element){var actualTop=element.offsetTop;var current=element.offsetParent;while(current!==null){actualTop+=current.offsetTop;current=current.offsetParent}if(document.compatMode=="BackCompat"){var elementScrollTop=document.body.scrollTop}else{var elementScrollTop=document.documentElement.scrollTop}return actualTop-elementScrollTop};return getElementViewTop(arguments[0])''', a)
                 top += 95 + 5
                 left += 20 + 20
-                self.click_mode.click(left, top, a, 2)
+                self.click_mode.click(top,left, a, 2)
                 # pyautogui.moveTo(left, top, duration=6)
                 # pyautogui.click()
-                sleep(3)
+                # sleep(3)
                 return True
         return False
     
@@ -387,7 +398,7 @@ class ChinaUSearch(prototype):
         myprint.print_green_text(u"引擎:开始搜索标题")
         count = 1
         while True:
-            if count == self.total_page:
+            if count >= self.total_page:
                 myprint.print_red_text(u"已到达搜索上限页数, 开始退出")
                 if self.onlysearch == 0:
                     return False
@@ -426,8 +437,8 @@ class ChinaUSearch(prototype):
                     if self.satisfy_condition(div):
                         self.process_block(div)
                         return True
-            count = count + 1
             myprint.print_green_text(u"引擎:第{page}页搜索失败!尝试进入下一页".format(page = count))
+            count = count + 1
             ret = self.go_to_next_page()
             if ret == False:
                 return False
@@ -559,11 +570,13 @@ def get_task(db, id):
 
 def init():
     myprint.print_green_text(u"程序初始化中")
-    global taskid
+    global taskid,is_debug_mode
     parser = optparse.OptionParser()
     parser.add_option("-t", "--task_id", dest="taskid")
+    parser.add_option("-d", "--debug_mode", dest="is_debug", default="0")
     (options, args) = parser.parse_args()
     taskid = options.taskid
+    is_debug_mode = int(options.is_debug)
     myprint.print_green_text(u"程序初始化完成, 获取到任务id:{id}".format(id = options.taskid))
 
 
@@ -608,7 +621,7 @@ def main():
                 链接:{url},
                 内页脚本:{script_name}'''.format(**format_data))
             myprint.print_green_text(u"===========提交引擎初始化中===========")
-            engine = ChinaUSearch(logger,db,taskid,q,pids,t)
+            engine = ChinaUSearch(logger,db,taskid,q,pids,t, is_debug_mode)
             if engine.run():
                 q.put(1)
                 myprint.print_red_text(u"引擎:任务成功")

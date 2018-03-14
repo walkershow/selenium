@@ -76,7 +76,9 @@ class ClickMode(object):
         elif mode == 2:
             print "click by autogui"
             self.click_by_autogui(top, left) 
-        else:
+        elif mode == 3:
             print "click by script"
             self.click_by_sciprt(tag)
+        else:
+            print "no click"
 

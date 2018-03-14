@@ -4,6 +4,8 @@
 import sys
 import psutil
 from ColorPrint import Color
+from time import sleep
+import os
 if sys.platform == 'win32':
     import win32gui
     import win32process
@@ -15,8 +17,9 @@ myprint = Color()
 
 
 class SysClean(object):
-    def __init__(self, logger):
+    def __init__(self, logger, pids):
         self.logger = logger
+        self.pids = pids
 
     def startup_check(self):
         '''检测是否出现错误窗口,存在则清除相关进程

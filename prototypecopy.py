@@ -29,7 +29,7 @@ myprint = Color()
 
 
 class prototype(object):
-    def __init__(self, logger,db,task_cur_id,q,pids, is_debug_mode):
+    def __init__(self, logger,db,task_cur_id,q,pids, is_debug_mode=0):
         self.task_cur_id = task_cur_id
         self.logger = logger
         self.db = db
@@ -37,7 +37,7 @@ class prototype(object):
         self.q = q
         self.wait_stauts = False
         self.get_information()
-        self.sys_clean=SysClean(logger)
+        self.sys_clean=SysClean(logger, pids)
         self.sys_clean.startup_check()
         # self.startup_check()
         self.total_time_mutex = threading.Lock()
@@ -219,11 +219,11 @@ class prototype(object):
         self.log(status=4, end_time="CURRENT_TIMESTAMP")
         self.update_ran_times(True)
 
-    def task_failed(self):
+    def task_failed(self, status=5):
         myprint.print_green_text(u"引擎:开始提交平台失败情况")
         self.is_running = False
         self.set_task_status(5)
-        self.log(status=5, end_time="CURRENT_TIMESTAMP")
+        self.log(status=status, end_time="CURRENT_TIMESTAMP")
         self.update_task_allot_impl_sub()
         self.update_ran_times(False)
         self.end_task()

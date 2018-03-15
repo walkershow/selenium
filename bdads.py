@@ -505,7 +505,7 @@ class ChinaUSearch(prototype):
             if i=="1":
                 return
             self.go_to_next_page(i) 
-            # sleep(4)
+            sleep(4)
 
     def baiduSearch(self):
         # nums = [3,4,7,10]

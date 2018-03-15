@@ -120,7 +120,10 @@ class ChinaUSearch(prototype):
                 # fp = webdriver.FirefoxProfile()
                 self.browser = webdriver.Firefox(fp)
             else:
-                self.browser = webdriver.Chrome()
+                if sys.platform == "win32":
+                    self.browser = webdriver.Chrome()
+                else:
+                    self.browser = webdriver.Firefox()
             # self.browser = webdriver.Firefox(log_path='d:\\geckodriver.log')
 
             # self.browser.implicitly_wait(10)
@@ -374,22 +377,29 @@ class ChinaUSearch(prototype):
 
     def go_to_next_page(self, num=0):
         # pyautogui.scroll(-3000)
-        self.browser.execute_script(
-            "window.scrollTo(0,document.body.scrollHeight)")
         if num == 0:
-            a_list = self.browser.find_elements_by_css_selector("a.n")
+            selector = "a.n"
+            a_list = self.element_all(By.CSS_SELECTOR, selector)
+            print "*********find a.n**********"
+            # a_list = self.browser.find_elements_by_css_selector("a.n")
+            self.browser.execute_script(
+                "window.scrollTo(0,document.body.scrollHeight)")
             for a in a_list:
                 if a.text == u"下一页>":
                     self.move_to_next_btn(a, 100)
                     return True
         else:
+            print "jump in next page.."
             selector = "a>span.pc"
             divs = self.element_all(By.CSS_SELECTOR, selector)
+            print "*********find a>span.pc**********"
+            self.browser.execute_script(
+                "window.scrollTo(0,document.body.scrollHeight)")
             # divs = self.Wait.until(
             #     EC.presence_of_all_elements_located((By.CSS_SELECTOR,
             #                                          )))
-            a_list = self.browser.find_elements_by_css_selector(selector)
-            for a in a_list:
+            # a_list = self.browser.find_elements_by_css_selector(selector)
+            for a in divs:
                 # print a.text
                 if a.text == str(num):
                     self.move_to_next_btn(a, 100)
@@ -457,9 +467,16 @@ class ChinaUSearch(prototype):
                         adsdiv = []
                         divs = self.element_all(By.CSS_SELECTOR,
                                                 "div.c-container")
+                        # divs_h3 = self.element_all(By.CSS_SELECTOR,
+                                                # "h3")
+                        # divs_h3t = self.element_all(By.CSS_SELECTOR,
+                                                # "h3.t")
                         for div in divs:
                             try:
-                                title = div.find_element_by_tag_name("h3")
+                                title = self.element_all(By.CSS_SELECTOR,
+                                                "h3")
+
+                                # title = div.find_element_by_tag_name("h3")
                                 # print title
                             except Exception, e:
                                 print "div have no h3"
@@ -507,7 +524,7 @@ class ChinaUSearch(prototype):
             if i=="1":
                 return
             self.go_to_next_page(i) 
-            sleep(4)
+            # sleep(4)
 
     def baiduSearch(self):
         # nums = [3,4,7,10]
@@ -529,7 +546,7 @@ class ChinaUSearch(prototype):
                 else:
                     return True
             myprint.print_green_text(u"引擎:开始第{page}页搜索".format(page=count))
-            sleep(5)
+            # sleep(5)
             ret = self.handle_page(count)
             if ret:
                 return True

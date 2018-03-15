@@ -335,7 +335,7 @@ class ChinaUSearch(prototype):
         top = self.browser.execute_script(
             '''function getElementViewTop(element){var actualTop=element.offsetTop;var current=element.offsetParent;while(current!==null){actualTop+=current.offsetTop;current=current.offsetParent}if(document.compatMode=="BackCompat"){var elementScrollTop=document.body.scrollTop}else{var elementScrollTop=document.documentElement.scrollTop}return actualTop-elementScrollTop};return getElementViewTop(arguments[0])''',
             title)
-        self.click_mode.click(top, left, a_tag, self.cm)
+        self.click_mode.click(top, left, a_tag, 110, self.cm)
         # 修正位置
         # step = random.randint(20, 150)
         # top += 110
@@ -348,7 +348,9 @@ class ChinaUSearch(prototype):
         # sleep(10)
         # self.browser.execute_script("arguments[0].click()", a_tag)
 
-    def move_to_next_btn(self, ele, step=110):
+
+
+    def move_to_next_btn(self, ele, step=110, p_ctrl=False):
         availHeight = self.browser.execute_script(
             "return window.document.documentElement.clientHeight;")
         top = self.browser.execute_script(
@@ -365,7 +367,7 @@ class ChinaUSearch(prototype):
         # 修正位置
         top += step
         left += 20
-        self.click_mode.click(top, left, ele, 2)
+        self.click_mode.click(top, left, ele,0, 2, p_ctrl)
         # pyautogui.moveTo(left, top, duration=1)
         # pyautogui.click()
         # sleep(3)
@@ -559,7 +561,8 @@ class ChinaUSearch(prototype):
         updateret = self.db.execute_sql(updatesql)
 
     def after_finish_search_task(self):
-        wait_function = [self.scroll_windows, self.random_click]
+        #wait_function = [self.scroll_windows, self.random_click]
+        wait_function = [self.random_click]
         self.task_finished()
         wait_time = self.standby_time * 60 + 10 + time()
         while wait_time > time():
@@ -567,6 +570,7 @@ class ChinaUSearch(prototype):
                 wait_time=int(wait_time - time())))
             if self.onlysearch == 0:
                 if self.random_event_status == 1:
+                    # nowhandle = self.browser.current_window_handle
                     if self.random_event_count < 5:
                         wait_function[random.randint(0,
                                                      len(wait_function) - 1)]()
@@ -643,13 +647,25 @@ class ChinaUSearch(prototype):
 
     def random_click(self):
         myprint.print_green_text(u"引擎:尝试随机点击")
-        self.switch_to_new_windows()
+        self.browser.switch_to.window(self.browser.window_handles[1])
+        # self.switch_to_new_windows()
         a_tags = self.browser.find_elements_by_css_selector("a>img")
+        print a_tags
         try:
             randa = random.choice(a_tags)
-            randa.location_once_scrolled_into_view
-            randa.click()
+            while randa.is_displayed():
+                randa.location_once_scrolled_into_view
+                if randa.is_displayed():
+                    # action = ActionChains(self.browser)
+                    # elem = driver.find_element_by_link_text("Gmail")
+                    # action.move_to_element(randa).key_down(Keys.CONTROL).click(randa).key_up(Keys.CONTROL).perform()
+                    # self.process_block(randa)
+                    self.move_to_next_btn(randa,110, True)
+                    break
+                    # randa.send_keys(Keys.CONTROL+ Keys.ENTER)
+                    # randa.click()
         except Exception, e:
+            print "rand click excpetion", e
             pass
 
     def switch_to_new_windows(self):

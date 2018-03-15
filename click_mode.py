@@ -47,22 +47,29 @@ class ClickMode(object):
         with open(self.jb_path, 'w') as f:
             f.writelines(operlist)
 
-    def click_by_zhixing(self, top, left):
+    def click_by_zhixing(self, top, left, top_step = 110):
         step = random.randint(20, 150)
         top += 110
         left += step
         self.write_position(left,top)
         os.system("d:\\selenium\\test.bat")
     
-    def click_by_autogui(self, top, left):
+    def click_by_autogui(self, top, left, top_step = 0, p_ctrl = False):
+        top += top_step
+        # left += 30
         ran = random.randint(1, 7)
         pyautogui.moveTo(left, top, duration=ran)
+        if p_ctrl:
+            pyautogui.keyDown('ctrl')
         pyautogui.click()
+        if p_ctrl:
+            pyautogui.keyUp('ctrl')
+        # pyautogui.click()
     
     def click_by_sciprt(self, tag):
         self.browser.execute_script("arguments[0].click()", tag)
 
-    def click(self, top, left, tag, mode=1):
+    def click(self, top, left, tag, top_step,mode=1, p_ctrl=False):
         '''
         mode 1:zhixing
         mode 2:autogui
@@ -75,7 +82,7 @@ class ClickMode(object):
             self.click_by_zhixing(top, left)
         elif mode == 2:
             print "click by autogui"
-            self.click_by_autogui(top, left) 
+            self.click_by_autogui(top, left, top_step, p_ctrl) 
         elif mode == 3:
             print "click by script"
             self.click_by_sciprt(tag)

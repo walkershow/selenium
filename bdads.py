@@ -147,8 +147,8 @@ class ChinaUSearch(prototype):
                 ele = self.Wait.until(
                     EC.presence_of_element_located((tag, locator)))
         except TimeoutException, e:
+            self.logger.info("no such element:{0}".format(locator))
             raise NoSuchElementException(locator)
-            logger.info("no such element:{0}".format(locator))
         return ele
 
     def element_all(self, tag, locator):
@@ -160,8 +160,8 @@ class ChinaUSearch(prototype):
                 divs = self.Wait.until(
                     EC.presence_of_all_elements_located((tag, locator)))
         except TimeoutException, e:
+            self.logger.info("no such element1:{0}".format(locator))
             raise NoSuchElementException(locator)
-            logger.info("no such element:{0}".format(locator))
 
         return divs
 
@@ -382,9 +382,13 @@ class ChinaUSearch(prototype):
                     return True
         else:
             selector = "a>span.pc"
+            divs = self.element_all(By.CSS_SELECTOR, selector)
+            # divs = self.Wait.until(
+            #     EC.presence_of_all_elements_located((By.CSS_SELECTOR,
+            #                                          )))
             a_list = self.browser.find_elements_by_css_selector(selector)
             for a in a_list:
-                print a.text
+                # print a.text
                 if a.text == str(num):
                     self.move_to_next_btn(a, 100)
                     return True
@@ -442,7 +446,8 @@ class ChinaUSearch(prototype):
             myprint.print_green_text(u"引擎:成功进入下一页")
 
     def handle_page(self, count):
-        for i in range(0, 2):
+        # for i in range(0, 2):
+        if True:
             try:
                 if self.onlysearch == 0:
                     if self.method == "showurl":
@@ -482,12 +487,16 @@ class ChinaUSearch(prototype):
                 return False
             except NoSuchElementException, e:
                 myprint.print_red_text(u"进入下一页错误,刷新:{0}".format(e))
-                self.browser.refresh()
-                continue
+                self.logger.error(u"进入下一页错误,刷新:{0}".format(e))
+                # self.browser.refresh()
+                # continue
+                return False
             except Exception, e:
                 myprint.print_red_text(u"进入下一页错误1,刷新:{0}".format(e))
-                self.browser.refresh()
-                continue
+                self.logger.error(u"进入下一页错误1,刷新:{0}".format(e))
+                # self.browser.refresh()
+                return False
+                # continue
 
         return False
 
@@ -496,7 +505,7 @@ class ChinaUSearch(prototype):
             if i=="1":
                 return
             self.go_to_next_page(i) 
-            sleep(4)
+            # sleep(4)
 
     def baiduSearch(self):
         # nums = [3,4,7,10]
@@ -569,7 +578,8 @@ class ChinaUSearch(prototype):
         self.quit()  # 浏览器退出
 
     def run(self):
-        for i in range(0, 2):
+        # for i in range(0, 2):
+        if True:
             try:
                 if self.terminal_type == 2:
                     res = self.baiduSearchPhone()
@@ -589,16 +599,16 @@ class ChinaUSearch(prototype):
                 myprint.print_red_text(u"找不到对应元素:{0}".format(e))
                 self.task_failed(8)
                 sleep(7)
-                myprint.print_red_text(u"重试任务")
-                continue
-                # return False
+                # myprint.print_red_text(u"重试任务")
+                # continue
+                return False
             except TimeoutException, e:
                 myprint.print_red_text(u"超时,找不到对应元素2:{0}".format(e))
                 self.task_failed(8)
                 sleep(5)
-                myprint.print_red_text(u"重试任务")
-                continue
-                # return False
+                # myprint.print_red_text(u"重试任务")
+                # continue
+                return False
             except Exception, e:
                 myprint.print_red_text(e)
                 myprint.print_red_text(u"引擎遇到错误:可能是网速过慢或者网络中断")
@@ -606,8 +616,9 @@ class ChinaUSearch(prototype):
                     "=======================error:{0}======================".
                     format(e))
                 sleep(5)
-                myprint.print_red_text(u"重试任务")
-                continue
+                # myprint.print_red_text(u"重试任务")
+                # continue
+                return False
             # except Exception, e:
             #     myprint.print_red_text(e)
             # myprint.print_red_text(u"引擎遇到错误:可能是网速过慢或者网络中断")
@@ -663,9 +674,12 @@ class ChinaUSearch(prototype):
         print("quit")
         self.browser.get("about:support")
         profiletmp = self.browser.execute_script(
-            '''let currProfD = Services.dirsvc.get("ProfD", Ci.nsIFile);
-               let profileDir = currProfD.path;
-               return profileDir
+            '''let currProfD = Services.dirsvc.get("ProfD", Ci.nsIFile);
+
+               let profileDir = currProfD.path;
+
+               return profileDir
+
             ''')
         if self.copy_cookie == 1:
             if os.system("XCOPY /E /Y /C " + profiletmp + "\*.* " +
@@ -741,11 +755,16 @@ def main():
                     'onlysearch': t['onlysearch']
                 }
 
-                myprint.print_green_text(u'''
-                    开始执行任务:
-                    关键词:{keyword},
-                    标题:{title},
-                    链接:{url},
+                myprint.print_green_text(u'''
+
+                    开始执行任务:
+
+                    关键词:{keyword},
+
+                    标题:{title},
+
+                    链接:{url},
+
                     内页脚本:{script_name}'''.format(**format_data))
                 myprint.print_green_text(u"===========提交引擎初始化中===========")
                 engine = ChinaUSearch(logger, db, taskid, q, pids, t,

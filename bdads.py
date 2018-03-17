@@ -32,7 +32,7 @@ from input_mode import InputMode
 from prototypecopy import prototype
 from pypinyin import Style, lazy_pinyin, pinyin
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException,StaleElementReferenceException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
@@ -377,9 +377,15 @@ class ChinaUSearch(prototype):
 
     def go_to_next_page(self, num=0):
         # pyautogui.scroll(-3000)
+        # stale = True
+        # while stale:
+        # for i in range(1,5):
+            # if stale:
+            # try:
         if num == 0:
             selector = "a.n"
             a_list = self.element_all(By.CSS_SELECTOR, selector)
+            # stale = False
             print "*********find a.n**********"
             # a_list = self.browser.find_elements_by_css_selector("a.n")
             self.browser.execute_script(
@@ -392,6 +398,7 @@ class ChinaUSearch(prototype):
             print "jump in next page.."
             selector = "a>span.pc"
             divs = self.element_all(By.CSS_SELECTOR, selector)
+            # stale = False
             print "*********find a>span.pc**********"
             self.browser.execute_script(
                 "window.scrollTo(0,document.body.scrollHeight)")
@@ -404,6 +411,10 @@ class ChinaUSearch(prototype):
                 if a.text == str(num):
                     self.move_to_next_btn(a, 100)
                     return True
+                # except StaleElementReferenceException, e:
+                #     print "stale retry"
+                #     stale = True 
+                #     continue
         return False
 
     def go_to_next_page_phone(self):
@@ -458,64 +469,70 @@ class ChinaUSearch(prototype):
             myprint.print_green_text(u"引擎:成功进入下一页")
 
     def handle_page(self, count):
-        # for i in range(0, 2):
-        if True:
-            try:
-                if self.onlysearch == 0:
-                    if self.method == "showurl":
-                        titles = []
-                        adsdiv = []
-                        divs = self.element_all(By.CSS_SELECTOR,
-                                                "div.c-container")
-                        # divs_h3 = self.element_all(By.CSS_SELECTOR,
-                                                # "h3")
-                        # divs_h3t = self.element_all(By.CSS_SELECTOR,
-                                                # "h3.t")
+        stale = True
+        for i in range(0, 5):
+        # while stale:
+            if stale:
+                try:
+                    if self.onlysearch == 0:
+                        if self.method == "showurl":
+                            titles = []
+                            adsdiv = []
+                            divs = self.element_all(By.CSS_SELECTOR,
+                                                    "div.c-container")
+                            stale = False
+                            for div in divs:
+                                # try:
+                                if True:
+                                    # title = self.element_all(By.CSS_SELECTOR,
+                                    #                 "h3")
+                                    # title= WebDriverWait(self.browser, 10).until(
+                                    #     div.find_element_by_tag_name("h3"))
+                                    title = div.find_element_by_tag_name("h3")
+                                    # print title
+                                # except Exception, e:
+                                #     print "div have no h3"
+                                # else:
+                                    if title is not None:
+                                        titles.append(title.text)
+                                        # print title.text
+
+                            odivs = self.element_all(By.CSS_SELECTOR, "h3.t")
+                            for div in odivs:
+                                # print "div.txt",div.text
+                                if div.text not in titles:
+                                    # print titles
+                                    # print div.text
+                                    if self.satisfy_condition(div):
+                                        self.process_block(div)
+                                        return True
+                        else:
+                            divs = self.Wait.until(
+                                EC.presence_of_all_elements_located(
+                                    (By.CSS_SELECTOR, "h3.t")))
                         for div in divs:
-                            try:
-                                title = self.element_all(By.CSS_SELECTOR,
-                                                "h3")
+                            if self.satisfy_condition(div):
+                                self.process_block(div)
+                                return True
+                    # myprint.print_green_text(u"引擎:第{page}页搜索失败!尝试进入下一页".format(page = count))
+                    return False
+                except StaleElementReferenceException, e:
+                    print "stale retry2"
+                    stale = True 
+                    continue
 
-                                # title = div.find_element_by_tag_name("h3")
-                                # print title
-                            except Exception, e:
-                                print "div have no h3"
-                            else:
-                                if title is not None:
-                                    titles.append(title.text)
-                                    # print title.text
-
-                        odivs = self.element_all(By.CSS_SELECTOR, "h3.t")
-                        for div in odivs:
-                            # print "div.txt",div.text
-                            if div.text not in titles:
-                                # print titles
-                                # print div.text
-                                if self.satisfy_condition(div):
-                                    self.process_block(div)
-                                    return True
-                    else:
-                        divs = self.Wait.until(
-                            EC.presence_of_all_elements_located(
-                                (By.CSS_SELECTOR, "h3.t")))
-                    for div in divs:
-                        if self.satisfy_condition(div):
-                            self.process_block(div)
-                            return True
-                # myprint.print_green_text(u"引擎:第{page}页搜索失败!尝试进入下一页".format(page = count))
-                return False
-            except NoSuchElementException, e:
-                myprint.print_red_text(u"进入下一页错误,刷新:{0}".format(e))
-                self.logger.error(u"进入下一页错误,刷新:{0}".format(e))
-                # self.browser.refresh()
-                # continue
-                return False
-            except Exception, e:
-                myprint.print_red_text(u"进入下一页错误1,刷新:{0}".format(e))
-                self.logger.error(u"进入下一页错误1,刷新:{0}".format(e))
-                # self.browser.refresh()
-                return False
-                # continue
+                except NoSuchElementException, e:
+                    myprint.print_red_text(u"进入下一页错误,刷新:{0}".format(e))
+                    self.logger.error(u"进入下一页错误,刷新:{0}".format(e))
+                    # self.browser.refresh()
+                    # continue
+                    return False
+                # except Exception, e:
+                #     myprint.print_red_text(u"进入下一页错误1,刷新:{0}".format(e))
+                #     self.logger.error(u"进入下一页错误1,刷新:{0}".format(e))
+                #     # self.browser.refresh()
+                #     return False
+                    # continue
 
         return False
 
@@ -550,9 +567,9 @@ class ChinaUSearch(prototype):
             ret = self.handle_page(count)
             if ret:
                 return True
-            count = count + 1
             myprint.print_green_text(
                 u"引擎:第{page}页搜索失败!尝试进入下一页".format(page=count))
+            count = count + 1
             ret = self.go_to_next_page()
             if not ret:
                 return False
@@ -630,16 +647,16 @@ class ChinaUSearch(prototype):
                 # myprint.print_red_text(u"重试任务")
                 # continue
                 return False
-            except Exception, e:
-                myprint.print_red_text(e)
-                myprint.print_red_text(u"引擎遇到错误:可能是网速过慢或者网络中断")
-                self.logger.error(
-                    "=======================error:{0}======================".
-                    format(e))
-                sleep(5)
-                # myprint.print_red_text(u"重试任务")
-                # continue
-                return False
+            # except Exception, e:
+            #     myprint.print_red_text(e)
+            #     myprint.print_red_text(u"引擎遇到错误:可能是网速过慢或者网络中断")
+            #     self.logger.error(
+            #         "=======================error:{0}======================".
+            #         format(e))
+            #     sleep(5)
+            #     # myprint.print_red_text(u"重试任务")
+            #     # continue
+            #     return False
             # except Exception, e:
             #     myprint.print_red_text(e)
             # myprint.print_red_text(u"引擎遇到错误:可能是网速过慢或者网络中断")
@@ -773,7 +790,8 @@ def main():
     q = Queue.Queue()
     db, logger = configdb("DB_vm")
     pids = psutil.pids()
-    try:
+    # try:
+    if True:
         res = get_task(db, taskid)
         if res != None:
             for t in res:
@@ -810,11 +828,11 @@ def main():
                     myprint.print_red_text(u"引擎:任务失败")
         else:
             logger.error(u"没有获取到任务")
-    except Exception, e:
-        q.put(0)
-        engine.task_failed()
-        logger.error(u"引擎:搜索失败 {0}".format(e))
-        myprint.print_red_text(u"引擎:搜索失败")
+    # except Exception, e:
+    #     q.put(0)
+    #     engine.task_failed()
+    #     logger.error(u"引擎:搜索失败 {0}".format(e))
+    #     myprint.print_red_text(u"引擎:搜索失败")
 
 
 if __name__ == "__main__":

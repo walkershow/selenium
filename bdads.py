@@ -356,28 +356,40 @@ class ChinaUSearch(prototype):
         # sleep(3)
 
     def go_to_next_page(self, num=0):
-        if num == 0:
-            selector = "a.n"
-            a_list = self.element_all(By.CSS_SELECTOR, selector)
-            print "*********find a.n**********"
-            self.browser.execute_script(
-                "window.scrollTo(0,document.body.scrollHeight)")
-            for a in a_list:
-                if a.text == u"下一页>":
-                    self.move_to_next_btn(a, 100)
-                    return True
-        else:
-            print "jump in next page.."
-            selector = "a>span.pc"
-            divs = self.element_all(By.CSS_SELECTOR, selector)
-            print "*********find a>span.pc**********"
-            self.browser.execute_script(
-                "window.scrollTo(0,document.body.scrollHeight)")
-            for a in divs:
-                # print a.text
-                if a.text == str(num):
-                    self.move_to_next_btn(a, 100)
-                    return True
+        stale = True
+        for i in range(0, 5):
+            # while stale:
+            if stale:
+                try:
+                    if num == 0:
+                        selector = "a.n"
+                        a_list = self.element_all(By.CSS_SELECTOR, selector)
+                        stale = False
+                        print "*********find a.n**********"
+                        self.browser.execute_script(
+                            "window.scrollTo(0,document.body.scrollHeight)")
+                        for a in a_list:
+                            if a.text == u"下一页>":
+                                self.move_to_next_btn(a, 100)
+                                return True
+                    else:
+                        print "jump in next page.."
+                        selector = "a>span.pc"
+                        divs = self.element_all(By.CSS_SELECTOR, selector)
+                        stale = False
+                        print "*********find a>span.pc**********"
+                        self.browser.execute_script(
+                            "window.scrollTo(0,document.body.scrollHeight)")
+                        for a in divs:
+                            # print a.text
+                            if a.text == str(num):
+                                self.move_to_next_btn(a, 100)
+                                return True
+                except StaleElementReferenceException, e:
+                    myprint.print_red_text( "stale retry1")
+                    stale = True
+                    continue
+            break
         return False
 
     def go_to_next_page_phone(self):
@@ -479,6 +491,7 @@ class ChinaUSearch(prototype):
                     myprint.print_red_text(u"进入下一页错误,刷新:{0}".format(e))
                     self.logger.error(u"进入下一页错误,刷新:{0}".format(e))
                     return False
+            break
 
         return False
 
@@ -601,6 +614,8 @@ class ChinaUSearch(prototype):
             self.browser.execute_script("window.scrollTo(0,0)")
 
     def random_click(self):
+        if self.cm == 0:
+            return
         myprint.print_green_text(u"引擎:尝试随机点击")
         self.browser.switch_to.window(self.browser.window_handles[1])
         # self.switch_to_new_windows()
@@ -645,12 +660,18 @@ class ChinaUSearch(prototype):
         print("quit")
         self.browser.get("about:support")
         profiletmp = self.browser.execute_script(
-            '''let currProfD = Services.dirsvc.get("ProfD", Ci.nsIFile);
-
-               let profileDir = currProfD.path;
-
-               return profileDir
-
+            '''let currProfD = Services.dirsvc.get("ProfD", Ci.nsIFile);
+
+
+
+               let profileDir = currProfD.path;
+
+
+
+               return profileDir
+
+
+
             ''')
         if self.copy_cookie == 1:
             if os.system("XCOPY /E /Y /C " + profiletmp + "\*.* " +
@@ -729,11 +750,16 @@ def main():
                     'onlysearch': t['onlysearch']
                 }
 
-                myprint.print_green_text(u'''
-                    开始执行任务:
-                    关键词:{keyword},
-                    标题:{title},
-                    链接:{url},
+                myprint.print_green_text(u'''
+
+                    开始执行任务:
+
+                    关键词:{keyword},
+
+                    标题:{title},
+
+                    链接:{url},
+
                     内页脚本:{script_name}'''.format(**format_data))
                 myprint.print_green_text(u"===========提交引擎初始化中===========")
                 engine = ChinaUSearch(logger, db, taskid, q, pids, t,

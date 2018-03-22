@@ -119,7 +119,6 @@ class prototype(object):
         self.standby_time = res[0]["standby_time"]
         self.timeout = res[0]["timeout"]
         self.copy_cookie = res[0]["copy_cookie"]
-        self.cm= res[0]["click_mode"]
 
     def getip(self):
         try:

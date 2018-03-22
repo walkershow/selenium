@@ -28,9 +28,11 @@ import pyautogui
 import requests
 import wubi
 from click_mode import ClickMode
+from click_rate import ClickRate
 from ColorPrint import Color
 from input_mode import InputMode
 from prototypecopy import prototype
+
 from pypinyin import Style, lazy_pinyin, pinyin
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException
@@ -80,7 +82,7 @@ def drawSquare():
 
 
 class ChinaUSearch(prototype):
-    def __init__(self, logger, db, task_id, q, pids, task, is_debug_mode):
+    def __init__(self, logger, db, task_id, q, pids, task, cm, is_debug_mode):
         myprint.print_green_text(u"引擎:初始化本体")
         super(ChinaUSearch, self).__init__(logger, db, task_id, q, pids,
                                            is_debug_mode)
@@ -90,6 +92,7 @@ class ChinaUSearch(prototype):
         self.url = task["url"]
         self.id = task["id"]
         self.method = task["method"]
+        self.cm = cm
         self.random_event_status = task['random_event_status']
         self.total_page = task['total_page']
         self.start_search_page = task['start_search_page']
@@ -484,7 +487,8 @@ class ChinaUSearch(prototype):
 
     def jump_to_startpage(self, nums):
         for i in nums:
-            if i == "1":
+            # 第一页 跳转会导致滚动，无法定位到页首元素
+            if int(i) <= 1:
                 return
             self.go_to_next_page(i)
 
@@ -718,6 +722,10 @@ def main():
         res = get_task(db, taskid)
         if res != None:
             for t in res:
+                c_rate = t['click_rate']
+                cr = ClickRate(c_rate) 
+                cm = cr.be_click_or_not()
+        
                 if t['method'] == None:
                     t['method'] = "url"
                 format_data = {
@@ -726,7 +734,10 @@ def main():
                     'url': t['url'],
                     'method': t['method'],
                     'script_name': t['script_name'],
-                    'onlysearch': t['onlysearch']
+                    'onlysearch': t['onlysearch'],
+                    'click_mode': cm
+
+                    
                 }
 
                 myprint.print_green_text(u'''
@@ -734,9 +745,10 @@ def main():
                     关键词:{keyword},
                     标题:{title},
                     链接:{url},
+                    是否点击:{click_mode},
                     内页脚本:{script_name}'''.format(**format_data))
                 myprint.print_green_text(u"===========提交引擎初始化中===========")
-                engine = ChinaUSearch(logger, db, taskid, q, pids, t,
+                engine = ChinaUSearch(logger, db, taskid, q, pids, t, cm,
                                       is_debug_mode)
                 if engine.run():
                     q.put(1)
@@ -749,9 +761,9 @@ def main():
     except Exception, e:
         myprint.print_red_text(u"引擎遇到错误:可能是网速过慢或者网络中断")
         q.put(0)
+        traceback.print_exc()
         engine.task_failed()
         logger.error(u"引擎:搜索失败 {0}".format(e))
-        traceback.print_exc()
         myprint.print_red_text(u"引擎:搜索失败")
 
 

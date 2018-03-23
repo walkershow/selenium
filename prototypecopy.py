@@ -29,7 +29,7 @@ myprint = Color()
 
 
 class prototype(object):
-    def __init__(self, logger,db,task_cur_id,q,pids, is_debug_mode=0):
+    def __init__(self, logger,db,task_cur_id,q,pids, cm, is_debug_mode=0):
         self.task_cur_id = task_cur_id
         self.logger = logger
         self.db = db
@@ -45,6 +45,7 @@ class prototype(object):
         self.is_running = True
         self.browser = None
         self.is_debug_mode = is_debug_mode
+        self.cm = cm
         if self.is_debug_mode == 0:
             t = threading.Timer(60, self.time_counter,(q,))
             t.start()
@@ -119,7 +120,6 @@ class prototype(object):
         self.standby_time = res[0]["standby_time"]
         self.timeout = res[0]["timeout"]
         self.copy_cookie = res[0]["copy_cookie"]
-        self.cm= res[0]["click_mode"]
 
     def getip(self):
         try:
@@ -305,9 +305,9 @@ class prototype(object):
     def set_task_status(self, status):
         res = None
         if status == 2:
-            sql = "update vm_cur_task set status = {status}, succ_time=CURRENT_TIMESTAMP, update_time=CURRENT_TIMESTAMP where id = {cur_task_id}".format(status = status, cur_task_id = self.task_cur_id)
+            sql = "update vm_cur_task set status = {status}, succ_time=CURRENT_TIMESTAMP, update_time=CURRENT_TIMESTAMP, click_mode={cm} where id = {cur_task_id}".format(status = status, cur_task_id = self.task_cur_id, cm=self.cm)
         else:
-            sql = "update vm_cur_task set status = {status}, update_time=CURRENT_TIMESTAMP where id = {cur_task_id}".format(status = status, cur_task_id = self.task_cur_id)
+            sql = "update vm_cur_task set status = {status}, update_time=CURRENT_TIMESTAMP, click_mode={cm}  where id = {cur_task_id}".format(status = status, cur_task_id = self.task_cur_id, cm=self.cm)
         res = self.db.execute_sql(sql)
 
         if res < 0:

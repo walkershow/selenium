@@ -35,6 +35,7 @@ from prototypecopy import prototype
 
 from pypinyin import Style, lazy_pinyin, pinyin
 from selenium import webdriver
+from contextlib import contextmanager
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -105,7 +106,7 @@ class ChinaUSearch(prototype):
         myprint.print_green_text(u"引擎:初始化本体成功")
         myprint.print_green_text(u"引擎:初始化浏览器")
         self.webdriver_config()
-        self.Wait = WebDriverWait(self.browser, 10)
+        self.Wait = WebDriverWait(self.browser, 20)
         myprint.print_green_text(u"引擎:初始化浏览器成功")
 
     def webdriver_config(self):
@@ -520,22 +521,22 @@ class ChinaUSearch(prototype):
             if count == self.total_page:
                 myprint.print_red_text(u"已到达搜索上限页数, 开始退出")
                 if self.onlysearch == 0:
-                    return False
+                    return 2
                 else:
                     return True
             myprint.print_green_text(u"引擎:开始第{page}页搜索".format(page=count))
             # sleep(5)
             ret = self.handle_page(count)
             if ret:
-                return True
+                return 1
             myprint.print_green_text(
                 u"引擎:第{page}页搜索失败!尝试进入下一页".format(page=count))
             count = count + 1
             ret = self.go_to_next_page()
             if not ret:
-                return False
+                return 0
             myprint.print_green_text(u"引擎:成功进入下一页")
-        return True
+        return 1
 
     def __del__(self):
         self.browser.quit()
@@ -555,25 +556,34 @@ class ChinaUSearch(prototype):
                 id=self.id)
         updateret = self.db.execute_sql(updatesql)
 
+    @contextmanager
+    def wait_for_new_window(self, driver, timeout=10):
+        handles_before = driver.window_handles
+        yield
+        WebDriverWait(driver, timeout).until(
+            lambda driver: len(handles_before) != len(driver.window_handles))
+
     def after_finish_search_task(self):
         #wait_function = [self.scroll_windows, self.random_click]
+        with self.wait_for_new_window(self.browser):
+            pass
+        print "open new tab..."
         self.main_win = self.browser.window_handles[-1]
 
         wait_function = [self.random_click]
         self.task_finished()
         wait_time = self.standby_time * 60 + 10 + time()
+        times = random.randint(3,5)
         while wait_time > time():
             myprint.print_green_text(u"引擎:等待状态,距离完成还有:{wait_time}秒".format(
                 wait_time=int(wait_time - time())))
             if self.onlysearch == 0:
-                if self.random_event_status == 1:
-                    # nowhandle = self.browser.current_window_handle
-                    if self.random_event_count < 5:
-                        wait_function[random.randint(0,
-                                                     len(wait_function) - 1)]()
-                        self.random_event_count = self.random_event_count + 1
-                    else:
-                        myprint.print_green_text(u"引擎:随机事件次数已经达到上限")
+                if self.random_event_count < times:
+                    wait_function[random.randint(0,
+                                                 len(wait_function) - 1)]()
+                    self.random_event_count = self.random_event_count + 1
+                else:
+                    myprint.print_green_text(u"引擎:随机事件次数已经达到上限")
             sleep(10)
         self.task_wait_finished()
         self.quit()  # 浏览器退出
@@ -583,11 +593,19 @@ class ChinaUSearch(prototype):
         if True:
             try:
                 if self.terminal_type == 2:
-                    res = self.baiduSearchPhone()
+                    ret = self.baiduSearchPhone()
                 elif self.terminal_type == 1:
-                    res = self.baiduSearch()
-                if res:
+                    ret = self.baiduSearch()
+                if ret == 1:
                     self.after_finish_search_task()
+                elif ret == 2:
+                    myprint.print_red_text(u"引擎:搜索失败, 一到最后一页")
+                    self.logger.error(u"搜到到最后一任务状态改11")
+                    self.set_task_status(11)
+                    self.update_search_times()
+                    self.update_task_allot_impl_sub()
+                    self.quit()
+                    
                 else:
                     myprint.print_red_text(u"引擎:搜索失败, 没有找到目标")
                     self.logger.error(u"搜索不到目标，任务状态改为8")
@@ -624,19 +642,23 @@ class ChinaUSearch(prototype):
         myprint.print_green_text(u"引擎:尝试随机点击")
         self.browser.switch_to.window(self.main_win)
         # self.switch_to_new_windows()
-        a_tags = self.browser.find_elements_by_css_selector("a>img")
+
+        selector = "a>img"
+        a_tags = self.element_all(By.CSS_SELECTOR, selector)
+        # a_tags = self.browser.find_elements_by_css_selector("a>img")
         try:
             randa = random.choice(a_tags)
             while randa.is_displayed():
                 randa.location_once_scrolled_into_view
                 #快捷键操作
-                    # action = ActionChains(self.browser)
-                    # elem = driver.find_element_by_link_text("Gmail")
-                    # action.move_to_element(randa).key_down(Keys.CONTROL).click(randa).key_up(Keys.CONTROL).perform()
-                    # self.process_block(randa)
-                #移动点击
-                # self.move_to_next_btn(randa, 110, True)
-                randa.click()
+                action = ActionChains(self.browser)
+                # elem = driver.find_element_by_link_text("Gmail")
+                action.move_to_element(randa).key_down(Keys.CONTROL)\
+                .click(randa).key_up(Keys.CONTROL).perform()
+                # self.process_block(randa)
+            #移动点击
+            # self.move_to_next_btn(randa, 110, True)
+            # randa.click()
                 break
         except Exception, e:
             traceback.print_exc()
@@ -658,25 +680,16 @@ class ChinaUSearch(prototype):
             print "timeout and refresh"
             self.q.put(0)
             self.set_task_status(10)
-            self.browser.quit()
             os._exit(1)
+            # self.browser.quit()
 
     def quit(self):
         print("quit")
         self.browser.get("about:support")
         profiletmp = self.browser.execute_script(
             '''let currProfD = Services.dirsvc.get("ProfD", Ci.nsIFile);
-
-
-
                let profileDir = currProfD.path;
-
-
-
                return profileDir
-
-
-
             ''')
         if self.copy_cookie == 1:
             if os.system("XCOPY /E /Y /C " + profiletmp + "\*.* " +
@@ -740,7 +753,7 @@ def main():
     db, logger = configdb("DB_vm")
     pids = psutil.pids()
     try:
-    # if True:
+    if True:
         res = get_task(db, taskid)
         if res != None:
             for t in res:

@@ -27,6 +27,7 @@ import psutil
 import pyautogui
 import requests
 import wubi
+from datetime import datetime, timedelta
 from click_mode import ClickMode
 from click_rate import ClickRate
 from ColorPrint import Color
@@ -36,7 +37,7 @@ from prototypecopy import prototype
 from pypinyin import Style, lazy_pinyin, pinyin
 from selenium import webdriver
 from contextlib import contextmanager
-from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException,WebDriverException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
@@ -103,6 +104,7 @@ class ChinaUSearch(prototype):
         self.module = importlib.import_module(
             "script.{script_name}".format(script_name=self.script_name))
         self.loadstatus = True
+        self.win_pos = 1
         myprint.print_green_text(u"引擎:初始化本体成功")
         myprint.print_green_text(u"引擎:初始化浏览器")
         self.webdriver_config()
@@ -128,6 +130,8 @@ class ChinaUSearch(prototype):
                     self.browser = webdriver.Chrome()
                 else:
                     self.browser = webdriver.Firefox()
+            # self.browser.set_page_load_timeout(30)
+            # self.browser.set_page_load_timeout(30)
             # self.browser = webdriver.Firefox(log_path='d:\\geckodriver.log')
 
             self.click_mode = ClickMode(self.browser, self.is_debug_mode,
@@ -171,11 +175,54 @@ class ChinaUSearch(prototype):
 
         return divs
 
+    def is_element_stale(self, webelement):
+        """
+        Checks if a webelement is stale.
+        @param webelement: A selenium webdriver webelement
+        """
+        try:
+            webelement.tag_name
+        except StaleElementReferenceException:
+            print "element stale"
+            return True
+        except:
+            pass
+        
+        return False
+
+    def wait_util(self, condition, timeout=30, sleep_time=0.5, pass_exceptions=False, message=None):
+        # __check_condition_parameter_is_function(condition)
+
+        last_exception = None
+        end_time = datetime.now() + timedelta(seconds=timeout)
+        while datetime.now() < end_time:
+            try:
+                if condition():
+                    return
+            except Exception as e:
+                if pass_exceptions:
+                    raise e
+                else:
+                    last_exception = e
+            sleep(sleep_time)
+
+
+
     def baidu_search(self, keyword):
-        threading.Thread(target=self.load_page_timeout).start()
-        self.browser.get('''http://www.baidu.com''')
-        self.loadstatus = False
+        # threading.Thread(target=self.load_page_timeout).start()
+        # self.browser.get("http://www.baidu.com")
+        with self.wait_for_new_window(self.browser):
+            self.browser.execute_script("window.open('http://www.baidu.com')")
+        # self.switch_to_new_windows()  不能使用-1
+        num = len(self.browser.window_handles)
+        #firefox num+1
+        print "winlen:",num
+        self.browser.switch_to.window(self.browser.window_handles[self.win_pos])
+        self.win_pos = self.win_pos + 1
+
+        print "wait kw...."
         input_block = self.element(By.ID, "kw")
+        print "wait kw finish...."
         keywords = keyword.split(",")
         for i in range(0, len(keywords)):
             self.input_mode.input(input_block, keywords[i], "kw")
@@ -334,7 +381,9 @@ class ChinaUSearch(prototype):
         top = self.browser.execute_script(
             '''function getElementViewTop(element){var actualTop=element.offsetTop;var current=element.offsetParent;while(current!==null){actualTop+=current.offsetTop;current=current.offsetParent}if(document.compatMode=="BackCompat"){var elementScrollTop=document.body.scrollTop}else{var elementScrollTop=document.documentElement.scrollTop}return actualTop-elementScrollTop};return getElementViewTop(arguments[0])''',
             title)
-        self.click_mode.click(top, left, a_tag, 110, self.cm)
+
+        with self.wait_for_new_window(self.browser):
+            self.click_mode.click(top, left, a_tag, 110, self.cm)
 
     def move_to_next_btn(self, ele, step=110, p_ctrl=False):
         availHeight = self.browser.execute_script(
@@ -374,7 +423,7 @@ class ChinaUSearch(prototype):
                         for a in a_list:
                             if a.text == u"下一页>":
                                 self.move_to_next_btn(a, 100)
-                                return True
+                                return a
                     else:
                         print "jump in next page.."
                         selector = "a>span.pc"
@@ -384,16 +433,18 @@ class ChinaUSearch(prototype):
                         self.browser.execute_script(
                             "window.scrollTo(0,document.body.scrollHeight)")
                         for a in divs:
-                            # print a.text
+                            print "link text:",a.text
                             if a.text == str(num):
                                 self.move_to_next_btn(a, 100)
-                                return True
+                                return a #True
+                    sleep(3)
+                    continue
                 except StaleElementReferenceException, e:
                     myprint.print_red_text( "stale retry1")
                     stale = True
                     continue
             break
-        return False
+        return None #False
 
     def go_to_next_page_phone(self):
         self.browser.execute_script(
@@ -501,9 +552,11 @@ class ChinaUSearch(prototype):
     def jump_to_startpage(self, nums):
         for i in nums:
             # 第一页 跳转会导致滚动，无法定位到页首元素
+            print "num:",i
             if int(i) <= 1:
                 return
-            self.go_to_next_page(i)
+            ele = self.go_to_next_page(i)
+            self.wait_util(lambda: self.is_element_stale(ele))
 
     def baiduSearch(self):
         # nums = [3,4,7,10]
@@ -514,6 +567,7 @@ class ChinaUSearch(prototype):
         if self.start_search_page:
             nums = self.start_search_page.split(",")
             if nums:
+                print "nums:", nums
                 self.jump_to_startpage(nums)
         print "jump to startpage finished ..."
         count = 1
@@ -552,22 +606,20 @@ class ChinaUSearch(prototype):
                 id=self.id)
         else:
             myprint.print_green_text(u"引擎:添加失败搜索次数")
-            updatesql = "update baiduSearch set had_search_times = had_search_times + 1 where id = {id}".format(
-                id=self.id)
+        updatesql = "update baiduSearch set had_search_times = had_search_times + 1 where id = {id}".format(
+            id=self.id)
         updateret = self.db.execute_sql(updatesql)
 
     @contextmanager
-    def wait_for_new_window(self, driver, timeout=10):
+    def wait_for_new_window(self, driver, timeout=20):
         handles_before = driver.window_handles
+        print "len:",len(handles_before) 
         yield
         WebDriverWait(driver, timeout).until(
             lambda driver: len(handles_before) != len(driver.window_handles))
 
     def after_finish_search_task(self):
         #wait_function = [self.scroll_windows, self.random_click]
-        with self.wait_for_new_window(self.browser):
-            pass
-        print "open new tab..."
         self.main_win = self.browser.window_handles[-1]
 
         wait_function = [self.random_click]
@@ -580,7 +632,7 @@ class ChinaUSearch(prototype):
             if self.onlysearch == 0:
                 if self.random_event_count < times:
                     wait_function[random.randint(0,
-                                                 len(wait_function) - 1)]()
+                                                    len(wait_function) - 1)]()
                     self.random_event_count = self.random_event_count + 1
                 else:
                     myprint.print_green_text(u"引擎:随机事件次数已经达到上限")
@@ -589,43 +641,57 @@ class ChinaUSearch(prototype):
         self.quit()  # 浏览器退出
 
     def run(self):
-        # for i in range(0, 2):
-        if True:
+        for i in range(0, 2):
+            # if True:
             try:
                 if self.terminal_type == 2:
                     ret = self.baiduSearchPhone()
                 elif self.terminal_type == 1:
                     ret = self.baiduSearch()
-                if ret == 1:
-                    self.after_finish_search_task()
-                elif ret == 2:
-                    myprint.print_red_text(u"引擎:搜索失败, 一到最后一页")
-                    self.logger.error(u"搜到到最后一任务状态改11")
-                    self.set_task_status(11)
-                    self.update_search_times()
-                    self.update_task_allot_impl_sub()
-                    self.quit()
-                    
-                else:
-                    myprint.print_red_text(u"引擎:搜索失败, 没有找到目标")
-                    self.logger.error(u"搜索不到目标，任务状态改为8")
-                    self.set_task_status(8)
-                    self.update_search_times()
-                    self.update_task_allot_impl_sub()
-                    self.quit()
-                return True
+                    if ret == 1:
+                        self.after_finish_search_task()
+                    elif ret == 2:
+                        myprint.print_red_text(u"引擎:搜索失败, 一到最后一页")
+                        self.logger.error(u"搜到到最后一任务状态改11")
+                        self.set_task_status(11)
+                        self.update_search_times()
+                        self.update_task_allot_impl_sub()
+                        self.quit()
+                        
+                    else:
+                        myprint.print_red_text(u"引擎:搜索失败, 没有找到目标")
+                        self.logger.error(u"搜索不到目标，任务状态改为8")
+                        self.set_task_status(8)
+                        self.update_search_times()
+                        self.update_task_allot_impl_sub()
+                        self.quit()
+                    return True
             except NoSuchElementException, e:
                 myprint.print_red_text(u"找不到对应元素:{0}".format(e))
-                self.task_failed(8)
-                return False
+                traceback.print_exc()
+                # self.task_failed(8)
+                redo = True
+                continue
+                # return False
             except TimeoutException, e:
                 myprint.print_red_text(u"超时,找不到对应元素2:{0}".format(e))
-                self.task_failed(8)
-                return False
-        myprint.print_red_text(e)
-        myprint.print_red_text(u"引擎遇到错误:可能是网速过慢或者网络中断")
-        self.task_failed()
-        return False
+                traceback.print_exc()
+                # self.task_failed(8)
+                redo = True
+                continue
+                # return False
+            except WebDriverException,e:
+                myprint.print_red_text(u"超时,找不到对应元素3:{0}".format(e))
+                traceback.print_exc()
+                # self.task_failed(8)
+                redo = True
+                continue
+            traceback.print_exc()
+            self.task_failed(8)
+            myprint.print_red_text(e)
+            myprint.print_red_text(u"引擎遇到错误:可能是网速过慢或者网络中断")
+            self.task_failed()
+            return False
 
     def scroll_windows(self):
         myprint.print_green_text(u"引擎:尝试滚动滑动条")
@@ -643,10 +709,10 @@ class ChinaUSearch(prototype):
         self.browser.switch_to.window(self.main_win)
         # self.switch_to_new_windows()
 
-        selector = "a>img"
-        a_tags = self.element_all(By.CSS_SELECTOR, selector)
         # a_tags = self.browser.find_elements_by_css_selector("a>img")
         try:
+            selector = "a>img"
+            a_tags = self.element_all(By.CSS_SELECTOR, selector)
             randa = random.choice(a_tags)
             while randa.is_displayed():
                 randa.location_once_scrolled_into_view
@@ -672,32 +738,42 @@ class ChinaUSearch(prototype):
         self.browser.switch_to.window(windows[-1])
 
     def load_page_timeout(self):
-        # self.loadStatus = True
-        print "f started"
         sleep(30)
-        print "f finished"
+        # if True:
         if self.loadstatus:
-            print "timeout and refresh"
+            # print "timeout and refresh"
+            # pyautogui.press('f5')
             self.q.put(0)
             self.set_task_status(10)
+            self.browser.quit()
             os._exit(1)
-            # self.browser.quit()
 
     def quit(self):
         print("quit")
         self.browser.get("about:support")
-        profiletmp = self.browser.execute_script(
-            '''let currProfD = Services.dirsvc.get("ProfD", Ci.nsIFile);
-               let profileDir = currProfD.path;
-               return profileDir
-            ''')
-        if self.copy_cookie == 1:
-            if os.system("XCOPY /E /Y /C " + profiletmp + "\*.* " +
-                         self.origin_profile):
-                print "files should be copied :/"
+        # self.browser.get("about:blank")
+        sleep(3)
+        for i in range(1,3):
+            try:
+                profiletmp = self.browser.execute_script(
+                    '''let currProfD = Services.dirsvc.get("ProfD", Ci.nsIFile);
+                    let profileDir = currProfD.path;
+                    return profileDir
+                    ''')
+                if self.copy_cookie == 1:
+                    if os.system("XCOPY /E /Y /C " + profiletmp + "\*.* " +
+                                self.origin_profile):
+                        print "files should be copied :/"
+                sleep(5)
+                shutil.rmtree(profiletmp, True)
+                break
+            except Exception, e:
+                '''sometime cannt found services'''
+                traceback.print_exc()
+                sleep(5)
+                continue
+        
         self.browser.quit()
-        sleep(5)
-        shutil.rmtree(profiletmp, True)
 
 
 def get_task(db, id):
@@ -753,7 +829,7 @@ def main():
     db, logger = configdb("DB_vm")
     pids = psutil.pids()
     try:
-    if True:
+    # if True:
         res = get_task(db, taskid)
         if res != None:
             for t in res:

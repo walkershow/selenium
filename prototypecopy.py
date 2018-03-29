@@ -29,7 +29,7 @@ myprint = Color()
 
 
 class prototype(object):
-    def __init__(self, logger,db,task_cur_id,q,pids, cm, is_debug_mode=0):
+    def __init__(self, logger,db,task_cur_id,q,pids, cm=1, is_debug_mode=0):
         self.task_cur_id = task_cur_id
         self.logger = logger
         self.db = db

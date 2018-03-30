@@ -64,7 +64,7 @@ class ele_not_clickable(object):
             divs = WebDriverWait(browser,20).until(
                     EC.presence_of_all_elements_located((By.CSS_SELECTOR, selector)))
             print "*********",selector,"**********"
-
+            print "find pagenum:", self.count
             for a in divs:
                 print "not clicakble link text:",a.text
                 if a.text == str(self.count):
@@ -739,13 +739,14 @@ class ChinaUSearch(prototype):
         while wait_time > time():
             myprint.print_green_text(u"引擎:等待状态,距离完成还有:{wait_time}秒".format(
                 wait_time=int(wait_time - time())))
-            if self.onlysearch == 0:
-                if self.random_event_count < times:
-                    wait_function[random.randint(0,
-                                                    len(wait_function) - 1)]()
-                    self.random_event_count = self.random_event_count + 1
-                else:
-                    myprint.print_green_text(u"引擎:随机事件次数已经达到上限")
+            if self.random_event_status == 1:
+                if self.onlysearch == 0:
+                    if self.random_event_count < times:
+                        wait_function[random.randint(0,
+                                                        len(wait_function) - 1)]()
+                        self.random_event_count = self.random_event_count + 1
+                    else:
+                        myprint.print_green_text(u"引擎:随机事件次数已经达到上限")
             sleep(10)
         self.task_wait_finished()
         self.quit()  # 浏览器退出

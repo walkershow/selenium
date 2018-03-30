@@ -261,7 +261,6 @@ class ChinaUSearch(prototype):
                 pyautogui.press("enter")
                 ran = random.randint(2, 3)
                 sleep(ran)
-        print "find su"
         submit_button = self.element(By.XPATH, '''//*[@id="su"]''')
         left = self.browser.execute_script(
             '''function getElementViewLeft(element){var actualLeft=element.offsetLeft;var current=element.offsetParent;while(current!==null){actualLeft+=current.offsetLeft;current=current.offsetParent}if(document.compatMode=="BackCompat"){var elementScrollLeft=document.body.scrollLeft}else{var elementScrollLeft=document.documentElement.scrollLeft}return actualLeft-elementScrollLeft};return getElementViewLeft(arguments[0])''',
@@ -269,7 +268,6 @@ class ChinaUSearch(prototype):
         top = self.browser.execute_script(
             '''function getElementViewTop(element){var actualTop=element.offsetTop;var current=element.offsetParent;while(current!==null){actualTop+=current.offsetTop;current=current.offsetParent}if(document.compatMode=="BackCompat"){var elementScrollTop=document.body.scrollTop}else{var elementScrollTop=document.documentElement.scrollTop}return actualTop-elementScrollTop};return getElementViewTop(arguments[0])''',
             submit_button)
-        print "cacl pos"
         step = random.randint(20, 100)
         left += step
         top += 100
@@ -277,7 +275,6 @@ class ChinaUSearch(prototype):
         pyautogui.click()
         pyautogui.moveTo(800, 200, duration=3)
         pyautogui.click()
-        print "step over"
 
     def baidu_search_phone(self, keyword):
         self.browser.get('''http://m.baidu.com''')
@@ -639,7 +636,10 @@ class ChinaUSearch(prototype):
                 print "nums:", nums
                 self.jump_to_startpage(nums)
         print "jump to startpage finished ..."
-        count = 1
+        if nums:
+            count = int(nums[-1])
+        else:
+            count = 1
         while True:
             if count == self.total_page:
                 myprint.print_red_text(u"已到达搜索上限页数, 开始退出")
@@ -657,7 +657,7 @@ class ChinaUSearch(prototype):
             count = count + 1
             # with self.wait_for_page_load():
             ret = self.go_to_next_page()
-            ele = self.get_page_ele(count)
+            # ele = self.get_page_ele(count)
             # self.Wait.until(EC.element_to_be_clickable(By.XPATH,"//*[@id='page']/a[%d])"%(count)))
             print "start wait"
             self.Wait.until(ele_not_clickable(count))

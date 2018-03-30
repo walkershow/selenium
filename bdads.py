@@ -45,9 +45,39 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.expected_conditions import \
+    staleness_of
 
 myprint = Color()
 workpath = os.getcwd()
+
+class ele_not_clickable(object):
+    def __init__(self, count):
+        self.count = count
+
+    def is_ele_not_clickable(self,browser) :
+        try:
+            # if EC.element_to_be_clickable((By.XPATH,"//*[@id='page']/strong/span[2]")):
+            #     print ele.text,"clickable, old page"
+            #     return False
+            selector = "#page > strong > span.pc"
+            divs = WebDriverWait(browser,20).until(
+                    EC.presence_of_all_elements_located((By.CSS_SELECTOR, selector)))
+            print "*********",selector,"**********"
+
+            for a in divs:
+                print "not clicakble link text:",a.text
+                if a.text == str(self.count):
+                    print "ele is not clickable,new page"
+                    return True
+        except WebDriverException,e:
+            print "exp clickable,old page"
+            return False
+        print "ele is clickable,old page"
+        return False
+            
+    def __call__(self, driver):
+        return self.is_ele_not_clickable(driver)
 
 
 def drawSquare():
@@ -105,6 +135,7 @@ class ChinaUSearch(prototype):
             "script.{script_name}".format(script_name=self.script_name))
         self.loadstatus = True
         self.win_pos = 1
+        self.last_ret = None
         myprint.print_green_text(u"引擎:初始化本体成功")
         myprint.print_green_text(u"引擎:初始化浏览器")
         self.webdriver_config()
@@ -230,6 +261,7 @@ class ChinaUSearch(prototype):
                 pyautogui.press("enter")
                 ran = random.randint(2, 3)
                 sleep(ran)
+        print "find su"
         submit_button = self.element(By.XPATH, '''//*[@id="su"]''')
         left = self.browser.execute_script(
             '''function getElementViewLeft(element){var actualLeft=element.offsetLeft;var current=element.offsetParent;while(current!==null){actualLeft+=current.offsetLeft;current=current.offsetParent}if(document.compatMode=="BackCompat"){var elementScrollLeft=document.body.scrollLeft}else{var elementScrollLeft=document.documentElement.scrollLeft}return actualLeft-elementScrollLeft};return getElementViewLeft(arguments[0])''',
@@ -237,6 +269,7 @@ class ChinaUSearch(prototype):
         top = self.browser.execute_script(
             '''function getElementViewTop(element){var actualTop=element.offsetTop;var current=element.offsetParent;while(current!==null){actualTop+=current.offsetTop;current=current.offsetParent}if(document.compatMode=="BackCompat"){var elementScrollTop=document.body.scrollTop}else{var elementScrollTop=document.documentElement.scrollTop}return actualTop-elementScrollTop};return getElementViewTop(arguments[0])''',
             submit_button)
+        print "cacl pos"
         step = random.randint(20, 100)
         left += step
         top += 100
@@ -244,6 +277,7 @@ class ChinaUSearch(prototype):
         pyautogui.click()
         pyautogui.moveTo(800, 200, duration=3)
         pyautogui.click()
+        print "step over"
 
     def baidu_search_phone(self, keyword):
         self.browser.get('''http://m.baidu.com''')
@@ -302,7 +336,7 @@ class ChinaUSearch(prototype):
                         return False
             else:
                 if a_tag is not None:
-                    # print a_tag.text
+                    print a_tag.text
                     if a_tag.text.find(self.url) != -1:
                         return True
                     else:
@@ -407,6 +441,36 @@ class ChinaUSearch(prototype):
         # pyautogui.click()
         # sleep(3)
 
+    def get_page_ele(self, num):
+        for i in range(5):
+            try:
+                selector = "a>span.pc"
+                divs = self.element_all(By.CSS_SELECTOR, selector)
+                stale = False
+                print "*********find a>span.pc**********"
+                self.browser.execute_script(
+                    "window.scrollTo(0,document.body.scrollHeight)")
+                for a in divs:
+                    print "link text:",a.text
+                    if a.text == str(num).strip():
+                        return a #True
+                #may is no clicable
+                # xpath = "//*[@id='page']/strong/span[%d]"%(num)
+                # selector = "#page > strong > span.pc"
+                # divs = self.element_all(By.CSS_SELECTOR, selector)
+                # # divs = self.element_all(By.XPATH, xpath)
+                # print "*********",selector,"**********"
+                # self.browser.execute_script(
+                #     "window.scrollTo(0,document.body.scrollHeight)")
+                # for a in divs:
+                #     print "not clicakble link text:",a.text
+                #     if a.text == str(num).strip():
+                #         return a #True
+            except StaleElementReferenceException, e:
+                myprint.print_red_text( "stale retry4")
+                continue
+                
+                
     def go_to_next_page(self, num=0):
         stale = True
         for i in range(0, 5):
@@ -502,6 +566,7 @@ class ChinaUSearch(prototype):
         for i in range(0, 5):
             # while stale:
             if stale:
+                # if True:
                 try:
                     if self.onlysearch == 0:
                         if self.method == "showurl":
@@ -555,8 +620,12 @@ class ChinaUSearch(prototype):
             print "num:",i
             if int(i) <= 1:
                 return
+            # with self.wait_for_page_load():
             ele = self.go_to_next_page(i)
-            self.wait_util(lambda: self.is_element_stale(ele))
+            self.Wait.until(ele_not_clickable(i))
+            # self.wait_for_page_load()
+
+            # self.wait_util(lambda: self.is_element_stale(ele))
 
     def baiduSearch(self):
         # nums = [3,4,7,10]
@@ -586,7 +655,36 @@ class ChinaUSearch(prototype):
             myprint.print_green_text(
                 u"引擎:第{page}页搜索失败!尝试进入下一页".format(page=count))
             count = count + 1
+            # with self.wait_for_page_load():
             ret = self.go_to_next_page()
+            ele = self.get_page_ele(count)
+            # self.Wait.until(EC.element_to_be_clickable(By.XPATH,"//*[@id='page']/a[%d])"%(count)))
+            print "start wait"
+            self.Wait.until(ele_not_clickable(count))
+            print count,"wait over"
+            
+            # while True:
+            #     if ele is not None:
+            #         try:
+            #             ele.click()
+            #         except WebDriverException,e:
+            #             print count,"not clickable,new page"
+            #             break
+            #         print ele.text,"clickable, old page"
+            #         sleep(1)
+            #     else:
+            #         print "no element to click"
+            #         break
+
+            # self.last_ret = ret
+            # new_page = self.browser.find_element_by_tag_name('html')
+            # print "new_page id:",new_page.id
+            # print "new_page.session" , new_page.session
+            # print new_page
+            
+            # with self.wait_for_page_load():
+                # ret = self.go_to_next_page()
+                # pass
             if not ret:
                 return 0
             myprint.print_green_text(u"引擎:成功进入下一页")
@@ -618,6 +716,18 @@ class ChinaUSearch(prototype):
         WebDriverWait(driver, timeout).until(
             lambda driver: len(handles_before) != len(driver.window_handles))
 
+    @contextmanager
+    def wait_for_page_load(self, timeout=10):
+        old_page = self.browser.find_element_by_tag_name('html')
+        print "old_page.id" , old_page.id
+        # print "old_page.session" , old_page.session
+        print old_page
+        yield
+        WebDriverWait(self.browser, timeout).until(
+            staleness_of(old_page)
+        )
+        print "page loaded"
+
     def after_finish_search_task(self):
         #wait_function = [self.scroll_windows, self.random_click]
         self.main_win = self.browser.window_handles[-1]
@@ -641,7 +751,7 @@ class ChinaUSearch(prototype):
         self.quit()  # 浏览器退出
 
     def run(self):
-        for i in range(0, 2):
+        for i in range(0, 1):
             # if True:
             try:
                 if self.terminal_type == 2:
@@ -690,6 +800,8 @@ class ChinaUSearch(prototype):
             self.task_failed(8)
             myprint.print_red_text(e)
             myprint.print_red_text(u"引擎遇到错误:可能是网速过慢或者网络中断")
+            self.update_search_times()
+            self.update_task_allot_impl_sub()
             self.task_failed()
             return False
 

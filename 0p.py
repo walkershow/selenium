@@ -1,49 +1,44 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.common.action_chains import ActionChains
-from prototypecopy import prototype
-from ColorPrint import Color
-from script.script import Script
-import importlib
-
-from time import sleep
-from dbutil import DBUtil
-from pypinyin import pinyin, lazy_pinyin,Style
-import wubi
-import optparse
 import ConfigParser
+import cPickle as pickle
+import importlib
 import logging
 import logging.config
-import requests
-import urllib2
-import urllib
-import re
-import os
-import sys
-import random
 import math
-import pyautogui
 import multiprocessing
+import optparse
+import os
 import Queue
-import psutil
+import random
+import re
 import shutil
-import win32gui
-import win32process
-import win32api
-import win32con
-import cPickle as pickle
+import sys
+import urllib
+import urllib2
+from time import sleep
 
+import psutil
+import pyautogui
+import requests
+import wubi
 from click_mode import ClickMode
+from ColorPrint import Color
+from dbutil import DBUtil
 from input_mode import InputMode
+from prototypecopy import prototype
+from pypinyin import Style, lazy_pinyin, pinyin
+from script.script import Script
+from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
-isdebug = False #测试用
+isdebug = True #测试用
 
 myprint = Color()
 workpath = os.getcwd()
@@ -107,14 +102,14 @@ class ChinaUSearch(prototype):
             res = self.db.select_sql(sql, 'DictCursor')
             if res is None or len(res) == 0:
                 self.logger.error("can't get information profile_path")
-            if isdebug == True:
-                self.origin_profile = 'D:/profile/lhcjrry1.wapb1'#wapa59' #wapb1'#
-            else:
-                self.origin_profile = res[0]['path']
+            self.origin_profile = res[0]['path']
             print (self.origin_profile)
-            fp = webdriver.FirefoxProfile(self.origin_profile)
+            if isdebug == True:
+                self.browser = webdriver.Firefox()
+            else:
+                fp = webdriver.FirefoxProfile(self.origin_profile)
             #fp.set_preference('permissions.default.image', 2)
-            self.browser = webdriver.Firefox(fp)
+                self.browser = webdriver.Firefox(fp)
             # self.browser = webdriver.Chrome()
             self.click_mode = ClickMode(self.browser, "d:\\selenium\\000.jb")
             self.input_mode = InputMode(self.browser)
@@ -405,8 +400,6 @@ def init():
     parser.add_option("-t", "--task_id", dest="taskid")
     (options, args) = parser.parse_args()
     taskid = options.taskid
-    if isdebug == True:
-        taskid = 3302859#2909392 #2782115
     myprint.print_green_text(u"程序初始化完成, 获取到任务id:{id}".format(id = taskid))
 
 
@@ -434,13 +427,12 @@ def run():
     if ret:
         keyword = ret[0]['keyword'].decode("utf8")
         pids = psutil.pids() #进程号
-        try:
+        # try:
+        if True:
    #         while 1:#一直循环，实验用
             engine = ChinaUSearch(logger, db, taskid, q ,pids)
             print(u"建立引擎对象成功")
             usertype = engine.user_type
-            if isdebug == True:#实验
-                usertype = random.randint(0, 5)
             if usertype == 0: #百度
                 flag = engine.x_search(keyword, usertype,'''http://m.baidu.com''','''//*[@id="index-kw"]''',"index-kw")
             elif usertype == 1: #360
@@ -471,10 +463,10 @@ def run():
             sleep(10)
             myprint.print_green_text(u"引擎:任务完成，正常退出")
             q.put(1)
-        except Exception, e:
-            logger.error(u"搜索异常，引擎崩溃! {0}".format(e))
-            myprint.print_red_text(u"引擎:搜索引擎崩溃")
-            engine.closebroswer()
+        # except Exception, e:
+            # logger.error(u"搜索异常，引擎崩溃! {0}".format(e))
+            # myprint.print_red_text(u"引擎:搜索引擎崩溃")
+            # engine.closebroswer()
 
 
 def main():
@@ -487,30 +479,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

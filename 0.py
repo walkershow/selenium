@@ -247,6 +247,15 @@ class ChinaUSearch(prototype):
             self.logger.error(e)
             return False
 
+    # sooxie搜索
+    def sooxie_search(self, keyword, num):
+        try:
+            self.browser.get('''https://www.sooxie.com/''')
+            sleep(10)
+        except Exception, e:
+            self.logger.error(e)
+            return False
+
     # gcn.6a.com搜索
     def gcn_search(self):
         try:
@@ -404,8 +413,6 @@ class ChinaUSearch(prototype):
         shutil.rmtree(profiletmp, True)
 
 
-
-
 def init():
     myprint.print_green_text(u"程序初始化中")
     global taskid
@@ -486,6 +493,8 @@ def run():
             flag = engine.bing_search(keyword, usertype)
         elif usertype == 5:
             flag = engine.yahoo_search(keyword, usertype)
+        elif usertype == 6:
+            flag = engine.sooxie_search(keyword, usertype)
         if flag:
             sleep(10)
             myprint.print_green_text(u"引擎:子任务完成，准备更新数据库状态")

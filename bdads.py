@@ -638,6 +638,8 @@ class ChinaUSearch(prototype):
         print "jump to startpage finished ..."
         if nums:
             count = int(nums[-1])
+            if count == 0: 
+                count=1
         else:
             count = 1
         while True:

@@ -102,7 +102,7 @@ class ChinaUSearch(prototype):
             fp = webdriver.FirefoxProfile(self.origin_profile)
             #fp.set_preference('permissions.default.image', 2)
             self.browser = webdriver.Firefox(fp)
-            #self.browser = webdriver.Chrome()
+            # self.browser = webdriver.Chrome()
             self.click_mode=ClickMode(self.browser, "d:\\selenium\\000.jb")
             self.input_mode=InputMode(self.browser)
             # self.profile_path = []
@@ -195,6 +195,8 @@ class ChinaUSearch(prototype):
         try:
             self.browser.get('''http://www.chinaso.com/''')
             sleep(1)
+            self.update_db_log()
+            self.success_add()
             input_block = self.browser.find_element_by_xpath('''//*[@id="q"]''')
             self.input_mode.input(input_block, keyword, "q")
             input_block.send_keys(Keys.ENTER)
@@ -214,6 +216,8 @@ class ChinaUSearch(prototype):
         try:
             self.browser.get('''https://www.bing.com/''')
             sleep(1)
+            self.update_db_log()
+            self.success_add()
             input_block = self.browser.find_element_by_xpath('''//*[@id="sb_form_q"]''')
             self.input_mode.input(input_block, keyword, "sb_form_q")
             input_block.send_keys(Keys.ENTER)
@@ -233,6 +237,8 @@ class ChinaUSearch(prototype):
         try:
             self.browser.get('''https://www.yahoo.com/''')
             sleep(1)
+            self.update_db_log()
+            self.success_add()
             input_block = self.browser.find_element_by_xpath('''//*[@id="uh-search-box"]''')
             self.input_mode.input(input_block, keyword, "uh-search-box")
             input_block.send_keys(Keys.ENTER)
@@ -251,7 +257,18 @@ class ChinaUSearch(prototype):
     def sooxie_search(self, keyword, num):
         try:
             self.browser.get('''https://www.sooxie.com/''')
-            sleep(10)
+            sleep(1)
+            self.update_db_log()
+            self.success_add()
+            sleep(5)
+            if self.random_click_on_page(num):
+                for i in range(random.randint(1,3)):
+                    self.go_to_next_page(num)
+                    self.random_click_on_page(num)
+                return True
+            else:
+                return False
+            return True
         except Exception, e:
             self.logger.error(e)
             return False
@@ -373,10 +390,15 @@ class ChinaUSearch(prototype):
                 titleflag = "h2"
             elif num == 5:
                 elems = self.script.find_element_css_list("div.dd.algo.algo-sr")
+            elif num == 6:
+                elems = self.script.find_element_css_list("div.pro")
+                titleflag = "span"
+            sleep(5)
             if elems != None:
                 for ele in elems:
                     title = self.script.find_elem("tag", titleflag, ele)
                     ahref = self.script.find_elem("tag", "a", ele)
+                    print ahref
                     if title == None or ahref == None:
                         continue
                     if ele.is_displayed():
@@ -385,7 +407,7 @@ class ChinaUSearch(prototype):
                     ranres = random.sample(newsres, 1)
                     for ran in ranres:
                         sleep(3)
-                        if num == 4:
+                        if num == 4 or num==6:
                             self.process_block(ran,120)
                         else:
                             self.process_block(ran)

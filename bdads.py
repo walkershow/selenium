@@ -138,6 +138,7 @@ class ChinaUSearch(prototype):
         self.keyword = task["keyword"]
         self.url = task["url"]
         self.id = task["id"]
+        self.rid = task["rid"]
         self.method = task["method"]
         self.random_event_status = task['random_event_status']
         self.total_page = task['total_page']
@@ -211,7 +212,7 @@ class ChinaUSearch(prototype):
         try:
             if tag is None:
                 divs = self.Wait.until(
-                    EC.presence_of_all_element_located((locator)))
+                    EC.presence_of_all_elements_located((locator)))
             else:
                 divs = self.Wait.until(
                     EC.presence_of_all_elements_located((tag, locator)))
@@ -222,9 +223,12 @@ class ChinaUSearch(prototype):
         return divs
 
     def is_element_stale(self, webelement):
-        """
-        Checks if a webelement is stale.
-        @param webelement: A selenium webdriver webelement
+        """
+
+        Checks if a webelement is stale.
+
+        @param webelement: A selenium webdriver webelement
+
         """
         try:
             webelement.tag_name
@@ -747,13 +751,29 @@ class ChinaUSearch(prototype):
         print "page loaded"
 
     def taskshot_and_upload(self):
-        localfile = "D:\\task.jpg"
-        ss = ScreenShot(localfile)
-        ss.take()
-        ftp = PicFTP('192.168.1.53', 21, 'uppic', '123456', self.logger,
-                     self.server_id, self.vm_id)
-        ftp.login()
-        ftp.upload_task_file(self.task_id, localfile)
+        try:
+            selector = "a"
+            a_tags = self.element_all(By.TAG_NAME, selector)
+            randa = random.choice(a_tags)
+            while randa.is_displayed():
+                localfile = "D:\\{0}.jpg".format(self.rid)
+                # localfile = "d:\\task.jpg"
+                print localfile
+                ss = ScreenShot(localfile)
+                ss.take()
+                print "taked"
+                ftp = PicFTP('192.168.1.53', 21, 'uppic', '123456',
+                            self.logger, self.server_id, self.vm_id)
+                ftp.login()
+                ftp.upload_task_file(self.task_id, self.rid, localfile)
+                os.remove(localfile)
+
+                break
+        except Exception, e:
+            traceback.print_exc()
+            print "rand click excpetion", e
+            pass
+
 
     def after_finish_search_task(self):
         #wait_function = [self.scroll_windows, self.random_click]
@@ -762,6 +782,8 @@ class ChinaUSearch(prototype):
         wait_function = [self.random_click]
         self.task_finished()
         if sys.platform == 'win32':
+            self.browser.switch_to.window(self.main_win)
+            print "==========screen shot=========="
             self.taskshot_and_upload()
 
         wait_time = self.standby_time * 60 + 10 + time()
@@ -899,9 +921,12 @@ class ChinaUSearch(prototype):
         for i in range(1, 3):
             try:
                 profiletmp = self.browser.execute_script(
-                    '''let currProfD = Services.dirsvc.get("ProfD", Ci.nsIFile);
-                    let profileDir = currProfD.path;
-                    return profileDir
+                    '''let currProfD = Services.dirsvc.get("ProfD", Ci.nsIFile);
+
+                    let profileDir = currProfD.path;
+
+                    return profileDir
+
                     ''')
                 if self.copy_cookie == 1:
                     if os.system("XCOPY /E /Y /C " + profiletmp + "\*.* " +
@@ -921,8 +946,10 @@ class ChinaUSearch(prototype):
 
 def get_task(db, id):
     myprint.print_green_text(u"获取任务中")
-    sql = '''select t3.* from vm_cur_task t1 INNER JOIN baiduSearchIdMap t2 on 
-    t1.cur_task_id = t2.taskid LEFT JOIN baiduSearch t3 on t3.id = t2.search_id
+    sql = '''select t3.*,t1.id as rid from vm_cur_task t1 INNER JOIN baiduSearchIdMap t2 on 
+
+    t1.cur_task_id = t2.taskid LEFT JOIN baiduSearch t3 on t3.id = t2.search_id
+
     where t1.id = {id}  and t3.status = 1'''.format(id=id)
     res = db.select_sql(sql, 'DictCursor')
     if not res or len(res) == 0:
@@ -991,18 +1018,30 @@ def main():
                     'click_mode': cm
                 }
 
-                myprint.print_green_text(u'''
-
-                    开始执行任务:
-
-                    关键词:{keyword},
-
-                    标题:{title},
-
-                    链接:{url},
-
-                    是否点击:{click_mode},
-
+                myprint.print_green_text(u'''
+
+
+
+                    开始执行任务:
+
+
+
+                    关键词:{keyword},
+
+
+
+                    标题:{title},
+
+
+
+                    链接:{url},
+
+
+
+                    是否点击:{click_mode},
+
+
+
                     内页脚本:{script_name}'''.format(**format_data))
                 myprint.print_green_text(u"===========提交引擎初始化中===========")
                 engine = ChinaUSearch(logger, db, taskid, q, pids, t, cm,

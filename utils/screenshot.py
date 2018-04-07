@@ -26,15 +26,15 @@ if sys.platform == "win32":
         def take(self):
             if sys.platform != 'win32':
                 return
-            print 'go'
+            # print 'go'
             rect = RECT()
             HWND = win32gui.GetForegroundWindow()
-            print HWND
+            # print HWND
             ctypes.windll.user32.GetWindowRect(HWND, ctypes.byref(rect))
-            coordinate = (rect.left + 2, rect.top + 50, rect.right - 2,
+            coordinate = (rect.left + 2, rect.top + 100, rect.right - 2,
                           rect.bottom - 20)
             pic = ImageGrab.grab(coordinate)
-            pic.show()
+            # pic.show()
             pic.save(self.path, quality=50)
 
 

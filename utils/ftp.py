@@ -73,7 +73,7 @@ class FTP(object):
         file_handler = open(localfile, 'rb')  #打开本地要上传的文件
         self.ftp.storbinary('STOR %s' % remotefile, file_handler)  #上传本地文件
         file_handler.close()  #关闭打开的文件
-        self.logger.info('文件已传送: %s' % localfile)
+        # self.logger.info('文件已传送: %s' % localfile)
 
     #创建子目录并执行上面的 上传文件upload_file函数
     def upload_files(self, localdir='./', remotedir='./'):

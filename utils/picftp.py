@@ -26,9 +26,10 @@ class PicFTP(ftp.FTP):
         dirpath = '{0}/{1}'.format(cur_date, task_id)
         return dirpath
 
-    def filename(self):
-        cur_time = time.strftime('%H%M%S')
-        fname = '{0}_{1}_{2}'.format(self.server_id, self.vm_id, cur_time)
+    def filename(self, id):
+        # cur_time = time.strftime('%H%M%S')
+        
+        fname = '{0}_{1}_{2}'.format(self.server_id, self.vm_id, id )
         return fname
 
     def mkdir(self, path):
@@ -42,10 +43,10 @@ class PicFTP(ftp.FTP):
                 self.ftp.cwd(d)
         self.ftp.cwd(self.remotedir)
 
-    def upload_task_file(self, task_id, localfile):
+    def upload_task_file(self, task_id, id, localfile):
         dirpath = self.dir_path(task_id)
         self.mkdir(dirpath)
-        remote_filename = self.filename()
+        remote_filename = self.filename(id)
         print remote_filename
         remote_path = os.path.join(dirpath, remote_filename + ".jpg")
         self.upload_file(localfile, remote_path)

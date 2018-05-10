@@ -2,6 +2,12 @@
 # -*- coding: utf-8 -*-
 # File              : bdads.py
 # Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 10.05.2018 17:07:1525943254
+# Last Modified Date: 10.05.2018 17:07:1525943254
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : bdads.py
+# Author            : coldplay <coldplay_gz@sina.cn>
 # Date              : 10.05.2018 16:09:1525939742
 # Last Modified Date: 10.05.2018 16:09:1525939742
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
@@ -475,6 +481,7 @@ class ChinaUSearch(prototype):
         top += 125
         left += 40
         pyautogui.moveTo(left, top, duration=6)
+        self.click_mode.signal_pausing()
         pyautogui.click()
         sleep(10)
 
@@ -499,6 +506,7 @@ class ChinaUSearch(prototype):
             title)
         #用script首页后,之后继续打开可能会出现窗口数更之前一样,导致wait超时
         # with self.wait_for_new_window(self.browser):
+        self.click_mode.signal_pausing()
         self.click_mode.click(top, left, a_tag, 110, self.cm)
         sleep(3) 
 
@@ -519,6 +527,7 @@ class ChinaUSearch(prototype):
         # 修正位置
         top += step
         left += 20
+        self.click_mode.signal_pausing()
         self.click_mode.click(top, left, ele, 0, 2, p_ctrl)
         # pyautogui.moveTo(left, top, duration=1)
         # pyautogui.click()

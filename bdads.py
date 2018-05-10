@@ -456,7 +456,7 @@ class ChinaUSearch(prototype):
         top += 125
         left += 40
         pyautogui.moveTo(left, top, duration=6)
-        signal_pausing()
+        self.click_mode.signal_pausing()
         pyautogui.click()
         sleep(10)
 
@@ -850,7 +850,6 @@ class ChinaUSearch(prototype):
             try:
                 if self.terminal_type == 2:
                     ret = self.baiduSearchPhone()
-<<<<<<< HEAD
                     if ret == 1:
                         self.after_finish_search_task()
                     elif ret == 2:
@@ -868,8 +867,6 @@ class ChinaUSearch(prototype):
                         self.update_task_allot_impl_sub()
                         self.quit(0)
                     return True
-=======
->>>>>>> b1e281132a51de784df3fb7400b4d99d4c109c4f
                 elif self.terminal_type == 1 or self.terminal_type == 3:
                     ret = self.baiduSearch()
                     if ret == 1:
@@ -910,11 +907,6 @@ class ChinaUSearch(prototype):
                 redo = True
                 # continue
             traceback.print_exc()
-<<<<<<< HEAD
-=======
-            self.task_failed(8)
-            # myprint.print_red_text(e)
->>>>>>> b1e281132a51de784df3fb7400b4d99d4c109c4f
             myprint.print_red_text(u"引擎遇到错误:可能是网速过慢或者网络中断")
             self.update_search_times()
             self.update_task_allot_impl_sub()
@@ -1067,8 +1059,8 @@ def main():
     q = Queue.Queue()
     db, logger = configdb("DB_vm")
     pids = psutil.pids()
-    #try:
-    if True:
+    try:
+        # if True:
         res = get_task(db, taskid)
         if res != None:
             for t in res:
@@ -1124,13 +1116,13 @@ def main():
                     myprint.print_red_text(u"引擎:任务失败")
         else:
             logger.error(u"没有获取到任务")
-    #except Exception, e:
-    #    myprint.print_red_text(u"引擎遇到错误:可能是网速过慢或者网络中断")
-    #    q.put(0)
-    #    traceback.print_exc()
-    #    engine.task_failed()
-    #    logger.error(u"引擎:搜索失败 {0}".format(e))
-    #    myprint.print_red_text(u"引擎:搜索失败")
+    except Exception, e:
+        myprint.print_red_text(u"引擎遇到错误:可能是网速过慢或者网络中断")
+        q.put(0)
+        traceback.print_exc()
+        engine.task_failed()
+        logger.error(u"引擎:搜索失败 {0}".format(e))
+        myprint.print_red_text(u"引擎:搜索失败")
 
 
 if __name__ == "__main__":

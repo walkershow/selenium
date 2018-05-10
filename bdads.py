@@ -2,15 +2,33 @@
 # -*- coding: utf-8 -*-
 # File              : bdads.py
 # Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 06.04.2018 16:17:1523002674
-# Last Modified Date: 06.04.2018 16:17:1523002674
+# Date              : 10.05.2018 16:09:1525939742
+# Last Modified Date: 10.05.2018 16:09:1525939742
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
 # File              : bdads.py
 # Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 06.04.2018 16:12:1523002360
-# Last Modified Date: 06.04.2018 16:17:1523002642
+# Date              : 10.05.2018 15:45:1525938349
+# Last Modified Date: 10.05.2018 15:45:1525938349
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# coding=utf-8
+# -*- coding: utf-8 -*-
+# File              : bdads.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 10.05.2018 15:09:1525936196
+# Last Modified Date: 10.05.2018 15:09:1525936196
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : bdads.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 10.05.2018 11:02:1525921355
+# Last Modified Date: 10.05.2018 11:02:1525921355
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : bdads.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 25.04.2018 11:07:1524625672
+# Last Modified Date: 25.04.2018 11:07:1524625672
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
 
 import ConfigParser
 import importlib
@@ -44,6 +62,7 @@ from click_rate import ClickRate
 from ColorPrint import Color
 from input_mode import InputMode
 from prototypecopy import prototype
+
 from utils.picftp import PicFTP
 if sys.platform == 'win32':
     from utils.screenshot import ScreenShot
@@ -180,7 +199,7 @@ class ChinaUSearch(prototype):
             # self.browser.set_page_load_timeout(30)
             # self.browser = webdriver.Firefox(log_path='d:\\geckodriver.log')
 
-            self.click_mode = ClickMode(self.browser, self.is_debug_mode,
+            self.click_mode = ClickMode(self.browser, self.server_id, self.db, self.is_debug_mode,
                                         "d:\\selenium\\000.jb")
             self.input_mode = InputMode(self.browser)
             self.browser.maximize_window()
@@ -262,6 +281,7 @@ class ChinaUSearch(prototype):
             sleep(sleep_time)
 
     def baidu_search(self, keyword):
+        print "get in baidu search"
         # threading.Thread(target=self.load_page_timeout).start()
         # self.browser.get("http://www.baidu.com")
         with self.wait_for_new_window(self.browser):
@@ -295,8 +315,10 @@ class ChinaUSearch(prototype):
         left += step
         top += 100
         pyautogui.moveTo(left, top, duration=3)
+        self.click_mode.signal_pausing()
         pyautogui.click()
         pyautogui.moveTo(800, 200, duration=3)
+        self.click_mode.signal_pausing()
         pyautogui.click()
 
     def baidu_search_phone(self, keyword):
@@ -434,6 +456,7 @@ class ChinaUSearch(prototype):
         top += 125
         left += 40
         pyautogui.moveTo(left, top, duration=6)
+        signal_pausing()
         pyautogui.click()
         sleep(10)
 
@@ -727,28 +750,6 @@ class ChinaUSearch(prototype):
             self.Wait.until(ele_not_clickable(count))
             print count, "wait over"
 
-            # while True:
-            #     if ele is not None:
-            #         try:
-            #             ele.click()
-            #         except WebDriverException,e:
-            #             print count,"not clickable,new page"
-            #             break
-            #         print ele.text,"clickable, old page"
-            #         sleep(1)
-            #     else:
-            #         print "no element to click"
-            #         break
-
-            # self.last_ret = ret
-            # new_page = self.browser.find_element_by_tag_name('html')
-            # print "new_page id:",new_page.id
-            # print "new_page.session" , new_page.session
-            # print new_page
-
-            # with self.wait_for_page_load():
-            # ret = self.go_to_next_page()
-            # pass
             if not ret:
                 return 0
             myprint.print_green_text(u"引擎:成功进入下一页")
@@ -849,6 +850,7 @@ class ChinaUSearch(prototype):
             try:
                 if self.terminal_type == 2:
                     ret = self.baiduSearchPhone()
+<<<<<<< HEAD
                     if ret == 1:
                         self.after_finish_search_task()
                     elif ret == 2:
@@ -866,6 +868,8 @@ class ChinaUSearch(prototype):
                         self.update_task_allot_impl_sub()
                         self.quit(0)
                     return True
+=======
+>>>>>>> b1e281132a51de784df3fb7400b4d99d4c109c4f
                 elif self.terminal_type == 1 or self.terminal_type == 3:
                     ret = self.baiduSearch()
                     if ret == 1:
@@ -906,6 +910,11 @@ class ChinaUSearch(prototype):
                 redo = True
                 # continue
             traceback.print_exc()
+<<<<<<< HEAD
+=======
+            self.task_failed(8)
+            # myprint.print_red_text(e)
+>>>>>>> b1e281132a51de784df3fb7400b4d99d4c109c4f
             myprint.print_red_text(u"引擎遇到错误:可能是网速过慢或者网络中断")
             self.update_search_times()
             self.update_task_allot_impl_sub()
@@ -939,6 +948,7 @@ class ChinaUSearch(prototype):
                 #快捷键操作
                 action = ActionChains(self.browser)
                 # elem = driver.find_element_by_link_text("Gmail")
+                self.click_mode.signal_pausing()
                 action.move_to_element(randa).key_down(
                     Keys.CONTROL).click(randa).key_up(Keys.CONTROL).perform()
                 # self.process_block(randa)
@@ -1057,8 +1067,8 @@ def main():
     q = Queue.Queue()
     db, logger = configdb("DB_vm")
     pids = psutil.pids()
-    try:
-        # if True:
+    #try:
+    if True:
         res = get_task(db, taskid)
         if res != None:
             for t in res:
@@ -1114,13 +1124,13 @@ def main():
                     myprint.print_red_text(u"引擎:任务失败")
         else:
             logger.error(u"没有获取到任务")
-    except Exception, e:
-        myprint.print_red_text(u"引擎遇到错误:可能是网速过慢或者网络中断")
-        q.put(0)
-        traceback.print_exc()
-        engine.task_failed()
-        logger.error(u"引擎:搜索失败 {0}".format(e))
-        myprint.print_red_text(u"引擎:搜索失败")
+    #except Exception, e:
+    #    myprint.print_red_text(u"引擎遇到错误:可能是网速过慢或者网络中断")
+    #    q.put(0)
+    #    traceback.print_exc()
+    #    engine.task_failed()
+    #    logger.error(u"引擎:搜索失败 {0}".format(e))
+    #    myprint.print_red_text(u"引擎:搜索失败")
 
 
 if __name__ == "__main__":

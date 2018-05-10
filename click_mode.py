@@ -1,15 +1,38 @@
 #!/usr/bin/env python    
+# -*- coding: utf-8 -*-
+# File              : click_mode.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 10.05.2018 10:45:1525920326
+# Last Modified Date: 10.05.2018 15:45:1525938352
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
 #encoding: utf-8  
 
 import pyautogui
 import random
 import os
+import time
+
+        
+            
 
 class ClickMode(object):
-    def __init__(self, browser, is_debug_mode=0, jb_path = None):
+    def __init__(self, browser, server_id, db, is_debug_mode=0, jb_path = None):
         self.browser = browser
         self.jb_path = jb_path
         self.is_debug_mode = is_debug_mode
+        self.server_id = server_id
+        self.db = db
+            
+    def signal_pausing(self):
+        sql = '''select notify_pause from vpn_status where serverid=%d and
+        notify_pause=1'''%(self.server_id) 
+        for i in range(0,6):
+            res = self.db.select_sql(sql)
+            if res is None or len(res)<=0:
+                return 
+            else:
+                print ("===================signal pausing====================")
+                time.sleep(5)
         
     def write_position(self,x, y):
         operlist = []
@@ -66,7 +89,7 @@ class ClickMode(object):
             pyautogui.keyUp('ctrl')
         # pyautogui.click()
     
-    def click_by_sciprt(self, tag):
+    def click_by_script(self, tag):
         self.browser.execute_script("arguments[0].click()", tag)
 
     def click(self, top, left, tag, top_step,mode=1, p_ctrl=False):
@@ -74,6 +97,7 @@ class ClickMode(object):
         mode 1:zhixing
         mode 2:autogui
     '''
+
         if self.is_debug_mode:
             mode = 2
 
@@ -85,7 +109,7 @@ class ClickMode(object):
             self.click_by_autogui(top, left, top_step, p_ctrl) 
         elif mode == 3:
             print "click by script"
-            self.click_by_sciprt(tag)
+            self.click_by_script(tag)
         else:
-            print "no click"
+                print "no click"
 

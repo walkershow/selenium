@@ -290,6 +290,7 @@ class ChinaUSearch(prototype):
         print "get in baidu search"
         # threading.Thread(target=self.load_page_timeout).start()
         # self.browser.get("http://www.baidu.com")
+        self.click_mode.signal_pausing()
         with self.wait_for_new_window(self.browser):
             self.browser.execute_script("window.open('http://www.baidu.com')")
         # self.switch_to_new_windows()  不能使用-1
@@ -328,6 +329,7 @@ class ChinaUSearch(prototype):
         pyautogui.click()
 
     def baidu_search_phone(self, keyword):
+        self.click_mode.signal_pausing()
         self.browser.get('''http://m.baidu.com''')
         sleep(1)
         try:

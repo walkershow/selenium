@@ -22,18 +22,33 @@ class ClickMode(object):
         self.is_debug_mode = is_debug_mode
         self.server_id = server_id
         self.db = db
-            
+
     def signal_pausing(self):
+        self.signal_pause_waiting()
+        self.signal_wakeup_waiting()
+
+    def signal_pause_waiting(self):
         sql = '''select notify_pause from vpn_status where serverid=%d and
-        notify_pause=1'''%(self.server_id) 
+        notify_pause=1 '''%(self.server_id) 
         for i in range(0,6):
             res = self.db.select_sql(sql)
             if res is None or len(res)<=0:
                 return 
             else:
-                print ("===================signal pausing====================")
+                print ("===================signal pause waiting====================")
                 time.sleep(5)
         
+    def signal_wakeup_waiting(self):
+        sql = '''select notify_pause from vpn_status where serverid=%d and
+        notify_pause=1 and vpnstatus=1'''%(self.server_id) 
+        for i in range(0,6):
+            res = self.db.select_sql(sql)
+            if res is None or len(res)<=0:
+                return 
+            else:
+                print ("===================signal wakeup waiting====================")
+                time.sleep(5)
+
     def write_position(self,x, y):
         operlist = []
         steplist = []

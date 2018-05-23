@@ -5,36 +5,6 @@
 # Date              : 10.05.2018 17:07:1525943254
 # Last Modified Date: 10.05.2018 17:07:1525943254
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : bdads.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 10.05.2018 16:09:1525939742
-# Last Modified Date: 10.05.2018 16:09:1525939742
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : bdads.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 10.05.2018 15:45:1525938349
-# Last Modified Date: 10.05.2018 15:45:1525938349
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : bdads.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 10.05.2018 15:09:1525936196
-# Last Modified Date: 10.05.2018 15:09:1525936196
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : bdads.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 10.05.2018 11:02:1525921355
-# Last Modified Date: 10.05.2018 11:02:1525921355
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : bdads.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 25.04.2018 11:07:1524625672
-# Last Modified Date: 25.04.2018 11:07:1524625672
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
 
 import ConfigParser
 import importlib
@@ -70,6 +40,7 @@ from input_mode import InputMode
 from prototypecopy import prototype
 
 from utils.picftp import PicFTP
+from utils.string_rect import GetTitleDimensions,GetTextDimensions
 if sys.platform == 'win32':
     from utils.screenshot import ScreenShot
 
@@ -168,7 +139,6 @@ class ChinaUSearch(prototype):
         self.total_page = task['total_page']
         self.start_search_page = task['start_search_page']
         self.terminal_type = task["terminal_type"]  # 终端
-        self.profile_type = task["terminal_type"]
         self.onlysearch = task["onlysearch"]
         self.random_event_count = 0
         self.module = importlib.import_module(
@@ -198,7 +168,8 @@ class ChinaUSearch(prototype):
                 self.browser = webdriver.Firefox(fp)
             else:
                 if sys.platform == "win32":
-                    self.browser = webdriver.Chrome()
+                    # self.browser = webdriver.Chrome()
+                    self.browser = webdriver.Firefox()
                 else:
                     self.browser = webdriver.Firefox()
             # self.browser.set_page_load_timeout(30)
@@ -488,6 +459,7 @@ class ChinaUSearch(prototype):
         sleep(10)
 
     def process_block(self, title):
+        w, h =  GetTitleDimensions(title.text)
         availHeight = self.browser.execute_script(
             "return window.document.documentElement.clientHeight;")
         top = self.browser.execute_script(
@@ -508,8 +480,10 @@ class ChinaUSearch(prototype):
             title)
         #用script首页后,之后继续打开可能会出现窗口数更之前一样,导致wait超时
         # with self.wait_for_new_window(self.browser):
-        self.click_mode.signal_pausing()
-        self.click_mode.click(top, left, a_tag, 110, self.cm)
+        # self.click_mode.signal_pausing()
+        w_a = random.randint(10,w)
+        h_a = random.randint(1,h)
+        self.click_mode.click(top+h_a, left+w_a, a_tag, 110, self.cm)
         sleep(3) 
 
     def move_to_next_btn(self, ele, step=110, p_ctrl=False):

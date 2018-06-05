@@ -39,14 +39,31 @@ class InputMode(object):
                 '''
             js = js.replace("{origin}",  wubi.get(word, 'cw')).replace("{replace_str}", word).replace("{kwid}",kwid)
             self.browser.execute_script(js)
-    
+
+    def input_paste(self, kw, keyword, kwid):
+        for word in keyword:
+                # kw.send_keys(word)
+            sleep(random.uniform(0.2, 1.5))
+            js = ''' function replace_last_str(origin_str, target_str, replace_str){
+                        return origin_str + replace_str;
+                    }
+                    value = document.getElementById("{kwid}").value;
+                    document.getElementById("{kwid}").value = replace_last_str(value, "{origin}", "{replace_str}")
+                '''
+            js = js.replace("{origin}", word).replace("{replace_str}", word).replace("{kwid}",kwid)
+            self.browser.execute_script(js)
+        
     def input(self, input_block, keyword, kwid, mode=0, brand=True):
         if brand:
-            mode = random.randint(0, 1)
+            # self.input_paste(input_block, keyword, kwid)
+            # return 
+            mode = random.randint(0, 2)
             if mode == 0:
                 self.input_pinyin(input_block, keyword, kwid)
             elif mode == 1:
                 self.input_wubi(input_block, keyword, kwid)
+            else:
+                self.input_paste(input_block, keyword, kwid)
     
 class PinYinWord(object):
     def __init__(self, string, wubi_status = False):

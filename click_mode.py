@@ -107,7 +107,7 @@ class ClickMode(object):
     def click_by_script(self, tag):
         self.browser.execute_script("arguments[0].click()", tag)
 
-    def click(self, top, left, tag, top_step,mode=1, p_ctrl=False):
+    def click(self, top, left, tag, top_step,mode=2, p_ctrl=False):
         '''
         mode 1:zhixing
         mode 2:autogui
@@ -118,7 +118,9 @@ class ClickMode(object):
 
         if mode == 1:
             print "click by zhixing"
-            self.click_by_zhixing(top, left)
+            # self.click_by_zhixing(top, left)
+            print "click by autogui"
+            self.click_by_autogui(top, left, top_step, p_ctrl) 
         elif mode == 2:
             print "click by autogui"
             self.click_by_autogui(top, left, top_step, p_ctrl) 

@@ -124,9 +124,9 @@ def drawSquare():
 
 
 class ChinaUSearch(prototype):
-    def __init__(self, logger, db, task_id, q, pids, task, cm, is_debug_mode):
+    def __init__(self, logger, db, task_id, q, pids, task, cm, is_ad, is_debug_mode):
         myprint.print_green_text(u"引擎:初始化本体")
-        super(ChinaUSearch, self).__init__(logger, db, task_id, q, pids, cm,
+        super(ChinaUSearch, self).__init__(logger, db, task_id, q, pids, cm, is_ad,
                                            is_debug_mode)
         self.script_name = task["script_name"]
         self.title = task["title"]
@@ -186,6 +186,7 @@ class ChinaUSearch(prototype):
             self.logger.error("the webdriver config failed,{0}".format(e))
             # 任务提供的profileid 的path为NULL
             self.set_task_status(9)
+            self.update_task_allot_impl_sub()
             myprint.print_red_text(u"引擎:浏览器配置失败，检查下profileid的path")
             self.quit(0)
             self.q.put(0)
@@ -272,7 +273,8 @@ class ChinaUSearch(prototype):
             self.browser.window_handles[self.win_pos])
         self.win_pos = self.win_pos + 1
 
-        print "wait kw...."
+        print "wait kw.... and sleep 10s"
+        sleep(10)
         input_block = self.element(By.ID, "kw")
         print "wait kw finish...."
         keywords = keyword.split(",")
@@ -344,6 +346,8 @@ class ChinaUSearch(prototype):
             try:
                 a_tag = block.find_element_by_css_selector(".c-showurl")
             except Exception, e:
+                if self.is_ad == 0:
+                    return False
                 print u"########广告########"
                 a_tag = block.find_element_by_css_selector("a:first-child")
                 try:
@@ -459,7 +463,9 @@ class ChinaUSearch(prototype):
         sleep(10)
 
     def process_block(self, title):
-        w, h =  GetTitleDimensions(title.text)
+        a_tag = title.find_element_by_tag_name("a")
+        myprint.print_green_text(u'''找到链接标题:{0}'''.format(a_tag.text))
+        w, h =  GetTitleDimensions(a_tag.text)
         availHeight = self.browser.execute_script(
             "return window.document.documentElement.clientHeight;")
         top = self.browser.execute_script(
@@ -480,10 +486,12 @@ class ChinaUSearch(prototype):
             title)
         #用script首页后,之后继续打开可能会出现窗口数更之前一样,导致wait超时
         # with self.wait_for_new_window(self.browser):
-        # self.click_mode.signal_pausing()
+        self.click_mode.signal_pausing()
         w_a = random.randint(10,w)
         h_a = random.randint(1,h)
-        self.click_mode.click(top+h_a, left+w_a, a_tag, 110, self.cm)
+        print "w,h", w, h
+        print "w_a,h_a", w_a, h_a
+        self.click_mode.click(top+h_a, left+w_a, a_tag, 100, self.cm)
         sleep(3) 
 
     def move_to_next_btn(self, ele, step=110, p_ctrl=False):
@@ -690,6 +698,7 @@ class ChinaUSearch(prototype):
             # with self.wait_for_page_load():
             ele = self.go_to_next_page(i)
             self.Wait.until(ele_not_clickable(i))
+            
             # self.wait_for_page_load()
 
             # self.wait_util(lambda: self.is_element_stale(ele))
@@ -706,14 +715,16 @@ class ChinaUSearch(prototype):
                 print "nums:", nums
                 self.jump_to_startpage(nums)
         print "jump to startpage finished ..."
+        count = 1
+        startpage = 1
         if nums:
-            count = int(nums[-1])
-            if count == 0:
+            startpage = int(nums[-1])
+            if startpage == 0:
                 count = 1
-        else:
-            count = 1
+                startpage = 1
+        pagenum = 0
         while True:
-            if count == self.total_page:
+            if count>= self.total_page:
                 myprint.print_red_text(u"已到达搜索上限页数, 开始退出")
                 if self.onlysearch == 0:
                     return 2
@@ -721,18 +732,19 @@ class ChinaUSearch(prototype):
                     return True
             myprint.print_green_text(u"引擎:开始第{page}页搜索".format(page=count))
             # sleep(5)
-            ret = self.handle_page(count)
+            pagenum = startpage+count
+            ret = self.handle_page(pagenum)
             if ret:
                 return 1
             myprint.print_green_text(
-                u"引擎:第{page}页搜索失败!尝试进入下一页".format(page=count))
+                u"引擎:第{page}页搜索失败!尝试进入下一页".format(page=pagenum))
             count = count + 1
             # with self.wait_for_page_load():
             ret = self.go_to_next_page()
             # ele = self.get_page_ele(count)
             # self.Wait.until(EC.element_to_be_clickable(By.XPATH,"//*[@id='page']/a[%d])"%(count)))
             print "start wait"
-            self.Wait.until(ele_not_clickable(count))
+            self.Wait.until(ele_not_clickable(pagenum))
             print count, "wait over"
 
             if not ret:
@@ -894,7 +906,6 @@ class ChinaUSearch(prototype):
             traceback.print_exc()
             myprint.print_red_text(u"引擎遇到错误:可能是网速过慢或者网络中断")
             self.update_search_times()
-            self.update_task_allot_impl_sub()
             self.task_failed()
             self.quit(0)
             return False
@@ -988,14 +999,18 @@ class ChinaUSearch(prototype):
         sleep(6)
         os.system("rd /q /s "+profiletmp)
 
-
-
+def is_ad_task(db, id):
+    sql = '''select is_ad from vm_task where id={0}'''.format(id)
+    res = db.select_sql(sql)
+    if not res or len(res) == 0:
+        return None
+    is_ad = res[0][0]
+    return is_ad
+    
 def get_task(db, id):
     myprint.print_green_text(u"获取任务中")
-    sql = '''select t3.*,t1.id as rid from vm_cur_task t1 INNER JOIN baiduSearchIdMap t2 on 
-
+    sql = '''select t3.*,t1.id as rid,t1.cur_task_id as cur_task_id from vm_cur_task t1 INNER JOIN baiduSearchIdMap t2 on 
     t1.cur_task_id = t2.taskid LEFT JOIN baiduSearch t3 on t3.id = t2.search_id
-
     where t1.id = {id}  and t3.status = 1'''.format(id=id)
     res = db.select_sql(sql, 'DictCursor')
     if not res or len(res) == 0:
@@ -1003,10 +1018,13 @@ def get_task(db, id):
         return None
     myprint.print_green_text(u"获取到{length}个任务".format(length=len(res)))
     for v in res:
+        task_id = v['cur_task_id']
+        is_ad = is_ad_task(db,task_id)
         v['keyword'] = v['keyword'].decode("utf8")
         v['title'] = v['title'].decode("utf8")
         v['area'] = v['area'].decode("utf8")
         v['url'] = v['url'].decode("utf8")
+        v['is_ad']  = is_ad
     return res
 
 
@@ -1052,6 +1070,7 @@ def main():
                 c_rate = t['click_rate']
                 cr = ClickRate(c_rate)
                 cm = cr.be_click_or_not()
+                is_ad = t['is_ad']
 
                 if t['method'] == None:
                     t['method'] = "url"
@@ -1062,36 +1081,22 @@ def main():
                     'method': t['method'],
                     'script_name': t['script_name'],
                     'onlysearch': t['onlysearch'],
-                    'click_mode': cm
+                    'click_mode': cm,
+                    'is_ad': t['is_ad']
+
                 }
 
                 myprint.print_green_text(u'''
-
-
-
                     开始执行任务:
-
-
-
                     关键词:{keyword},
-
-
-
                     标题:{title},
-
-
-
                     链接:{url},
-
-
-
                     是否点击:{click_mode},
-
-
-
-                    内页脚本:{script_name}'''.format(**format_data))
+                    内页脚本:{script_name},
+                    广告任务:{is_ad}'''.format(**format_data))
+                    
                 myprint.print_green_text(u"===========提交引擎初始化中===========")
-                engine = ChinaUSearch(logger, db, taskid, q, pids, t, cm,
+                engine = ChinaUSearch(logger, db, taskid, q, pids, t, cm, is_ad,
                                       is_debug_mode)
                 if engine.run():
                     q.put(1)

@@ -29,7 +29,7 @@ myprint = Color()
 
 
 class prototype(object):
-    def __init__(self, logger,db,task_cur_id,q,pids, cm=1, is_debug_mode=0):
+    def __init__(self, logger,db,task_cur_id,q,pids, cm=1, is_ad=0, is_debug_mode=0):
         self.task_cur_id = task_cur_id
         self.logger = logger
         self.db = db
@@ -46,6 +46,7 @@ class prototype(object):
         self.browser = None
         self.is_debug_mode = is_debug_mode
         self.cm = cm
+        self.is_ad = is_ad
         if self.is_debug_mode == 0:
             t = threading.Timer(60, self.time_counter,(q,))
             t.start()
@@ -70,6 +71,7 @@ class prototype(object):
                 # self.closebroswer()
                 # self.close_third_windows()
                 self.set_task_status(6)
+                # self.update_task_allot_impl_sub()
                 self.log(status=6, end_time="CURRENT_TIMESTAMP")
                 self.update_profile_status()
                 myprint.print_red_text(u"引擎:退出")
@@ -212,20 +214,22 @@ class prototype(object):
         self.exit = True
         self.total_time_mutex.release()
         self.wait_stauts = True
+        self.update_ran_times(True)
 
     def task_wait_finished(self):
         self.end_task()
         self.set_task_status(4)
         self.log(status=4, end_time="CURRENT_TIMESTAMP")
-        self.update_ran_times(True)
+        # self.update_ran_times(True)
 
     def task_failed(self, status=5):
         myprint.print_green_text(u"引擎:开始提交平台失败情况")
         self.is_running = False
         self.set_task_status(5)
         self.log(status=status, end_time="CURRENT_TIMESTAMP")
-        self.update_task_allot_impl_sub()
-        self.update_ran_times(False)
+        if not self.wait_stauts:
+            self.update_task_allot_impl_sub()
+            self.update_ran_times(False)
         self.end_task()
 
 
@@ -296,7 +300,8 @@ class prototype(object):
             "task_id": self.task_id,
             "group_id": self.task_group_id
         }
-        sql = "update vm_task_allot_impl set ran_times=ran_times - 1 where id = {group_id} and task_id = {task_id} and time_to_sec(NOW()) between time_to_sec(start_time) and time_to_sec(end_time)".format(**format_data)
+        sql = '''update vm_task_allot_impl set ran_times=ran_times - 1 where id = {group_id} and task_id = {task_id} 
+        and time_to_sec(NOW()) between time_to_sec(start_time) and time_to_sec(end_time) and ran_times>0'''.format(**format_data)
         ret = self.db.execute_sql(sql)
         if ret < 0:
             self.logger.error("update_task_allot_impl_sub")

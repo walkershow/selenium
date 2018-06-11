@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# File              : bdads.py
+# File              : string_rect.py
 # Author            : coldplay <coldplay_gz@sina.cn>
 # Date              : 10.05.2018 17:07:1525943254
-# Last Modified Date: 10.05.2018 17:07:1525943254
+# Last Modified Date: 11.06.2018 10:52:1528685569
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
 # import ImageFont
 
@@ -60,7 +60,8 @@ else:
         # tk.mainloop()  
 
     def GetTitleDimensions(text):
-        return GetTextDimensions(text,12, "TrueType",1.3, 1.2 )
+        return (200,12)
+        # return GetTextDimensions(text,12, "TrueType",1.3, 1.2 )
 
-# display_font("python代码:计算一个文本文件中所有大写字母,小写字母,..._百度知道","TrueType",12) 
-print(GetTextDimensions("python代码:计算一个文本文件中所有大写字母,小写字母,..._百度知道", 12, "TrueType"))
+display_font("python代码:计算一个文本文件中所有大写字母,小写字母,..._百度知道","TrueType",12) 
+# print(GetTextDimensions("python代码:计算一个文本文件中所有大写字母,小写字母,..._百度知道", 12, "TrueType"))

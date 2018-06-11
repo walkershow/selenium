@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# File              : 0p.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 11.06.2018 16:44:1528706682
+# Last Modified Date: 11.06.2018 16:44:1528706682
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -99,22 +105,28 @@ class ChinaUSearch(prototype):
     def webdriver_config(self):
         print("web driver_config")
         try:
-            mapping = {
-                "1" : ".pc",
-                "2" : ".wap"
-            }
-            sql = "select path from profiles where id = {profile_id}".format(profile_id=self.profile_id)
-            res = self.db.select_sql(sql, 'DictCursor')
-            if res is None or len(res) == 0:
-                self.logger.error("can't get information profile_path")
-            if isdebug == True:
-                self.origin_profile = 'D:/profile/lhcjrry1.wapb1'#wapa59' #wapb1'#
-            else:
-                self.origin_profile = res[0]['path']
-            print (self.origin_profile)
-            fp = webdriver.FirefoxProfile(self.origin_profile)
+            # mapping = {
+                # "1" : ".pc",
+                # "2" : ".wap"
+            # }
+            # sql = "select path from profiles where id = {profile_id}".format(profile_id=self.profile_id)
+            # res = self.db.select_sql(sql, 'DictCursor')
+            # if res is None or len(res) == 0:
+                # self.logger.error("can't get information profile_path")
+            # if isdebug == True:
+                # self.origin_profile = 'D:/profile/lhcjrry1.wapb1'#wapa59' #wapb1'#
+            # else:
+                # self.origin_profile = res[0]['path']
+            # print (self.origin_profile)
+            l = Link("/home/cp/.mozilla/firefox/btv8jtat.default",
+                    'jid1-AVgCeF1zoVzMjA@jetpack.xpi',
+                    'cookies.sqlite')
+            l.link_ext("extensions", self.profile_id)
+            l.link_cookie("", self.profile_id)
+
+            # fp = webdriver.FirefoxProfile(self.origin_profile)
             #fp.set_preference('permissions.default.image', 2)
-            self.browser = webdriver.Firefox(fp)
+            self.browser = webdriver.Firefox()
             # self.browser = webdriver.Chrome()
             self.click_mode = ClickMode(self.browser, "d:\\selenium\\000.jb")
             self.input_mode = InputMode(self.browser)

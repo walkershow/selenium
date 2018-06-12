@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 # File              : bdads.py
 # Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 11.06.2018 17:11:1528708293
-# Last Modified Date: 11.06.2018 17:11:1528708293
+# Date              : 12.06.2018 16:50:1528793452
+# Last Modified Date: 12.06.2018 16:50:1528793452
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
 # -*- coding: utf-8 -*-
 # File              : bdads.py
 # Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 10.05.2018 17:07:1525943254
-# Last Modified Date: 10.05.2018 17:07:1525943254
+# Date              : 12.06.2018 15:21:1528788093
+# Last Modified Date: 12.06.2018 15:21:1528788093
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
 
 import ConfigParser
@@ -47,7 +47,7 @@ from prototypecopy import prototype
 
 from utils.picftp import PicFTP
 from utils.link import Link
-from utils.string_rect import GetTitleDimensions,GetTextDimensions
+from utils.string_rect import GetTitleDimensions
 if sys.platform == 'win32':
     from utils.screenshot import ScreenShot
 
@@ -173,6 +173,7 @@ class ChinaUSearch(prototype):
                     'cookies.sqlite')
             l.link_ext("extensions", self.profile_id)
             l.link_cookie("", self.profile_id)
+            l.link_prefs("", self.profile_id)
 
             # print self.origin_profile
             if self.is_debug_mode == 0:

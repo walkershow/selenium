@@ -2,6 +2,12 @@
 # -*- coding: utf-8 -*-
 # File              : 0p.py
 # Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 12.06.2018 15:22:1528788138
+# Last Modified Date: 12.06.2018 15:22:1528788138
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0p.py
+# Author            : coldplay <coldplay_gz@sina.cn>
 # Date              : 11.06.2018 16:44:1528706682
 # Last Modified Date: 11.06.2018 16:44:1528706682
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
@@ -123,6 +129,7 @@ class ChinaUSearch(prototype):
                     'cookies.sqlite')
             l.link_ext("extensions", self.profile_id)
             l.link_cookie("", self.profile_id)
+            l.link_prefs("", self.profile_id)
 
             # fp = webdriver.FirefoxProfile(self.origin_profile)
             #fp.set_preference('permissions.default.image', 2)

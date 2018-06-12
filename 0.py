@@ -2,6 +2,12 @@
 # -*- coding: utf-8 -*-
 # File              : 0.py
 # Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 12.06.2018 15:22:1528788122
+# Last Modified Date: 12.06.2018 15:22:1528788122
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0.py
+# Author            : coldplay <coldplay_gz@sina.cn>
 # Date              : 11.06.2018 16:43:1528706623
 # Last Modified Date: 11.06.2018 16:43:1528706623
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
@@ -114,6 +120,7 @@ class ChinaUSearch(prototype):
                     'cookies.sqlite')
             l.link_ext("extensions", self.profile_id)
             l.link_cookie("", self.profile_id)
+            l.link_prefs("", self.profile_id)
 
             if isdebug == True:
                 self.browser = webdriver.Firefox()

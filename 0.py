@@ -2,28 +2,15 @@
 # -*- coding: utf-8 -*-
 # File              : 0.py
 # Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 13.06.2018 10:04:1528855471
-# Last Modified Date: 13.06.2018 10:04:1528855471
+# Date              : 13.06.2018 14:30:1528871414
+# Last Modified Date: 13.06.2018 14:30:1528871414
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
 # -*- coding: utf-8 -*-
 # File              : 0.py
 # Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 13.06.2018 09:59:1528855166
-# Last Modified Date: 13.06.2018 09:59:1528855166
+# Date              : 13.06.2018 14:29:1528871353
+# Last Modified Date: 13.06.2018 14:29:1528871362
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 12.06.2018 15:22:1528788122
-# Last Modified Date: 12.06.2018 15:22:1528788122
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 11.06.2018 16:43:1528706623
-# Last Modified Date: 11.06.2018 16:43:1528706623
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
 
 from contextlib import contextmanager
 from selenium import webdriver
@@ -60,6 +47,7 @@ import multiprocessing
 import Queue
 import psutil
 import shutil
+from utils.link import Link
 from click_mode import ClickMode
 from input_mode import InputMode
 myprint = Color()

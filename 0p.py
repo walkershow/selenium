@@ -2,23 +2,27 @@
 # -*- coding: utf-8 -*-
 # File              : 0p.py
 # Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 13.06.2018 10:05:1528855537
-# Last Modified Date: 13.06.2018 10:05:1528855537
+# Date              : 13.06.2018 14:40:1528872021
+# Last Modified Date: 13.06.2018 17:55:1528883743
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
 # -*- coding: utf-8 -*-
 # File              : 0p.py
 # Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 12.06.2018 15:22:1528788138
-# Last Modified Date: 12.06.2018 15:22:1528788138
+# Date              : 13.06.2018 14:35:1528871731
+# Last Modified Date: 13.06.2018 14:38:1528871892
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
 # -*- coding: utf-8 -*-
 # File              : 0p.py
 # Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 11.06.2018 16:44:1528706682
-# Last Modified Date: 11.06.2018 16:44:1528706682
+# Date              : 13.06.2018 14:30:1528871400
+# Last Modified Date: 13.06.2018 14:30:1528871400
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
 # -*- coding: utf-8 -*-
-
+# File              : 0p.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 13.06.2018 14:28:1528871316
+# Last Modified Date: 13.06.2018 14:28:1528871333
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -52,16 +56,13 @@ import multiprocessing
 import Queue
 import psutil
 import shutil
-import win32gui
-import win32process
-import win32api
-import win32con
 import cPickle as pickle
 
+from utils.link import Link
 from click_mode import ClickMode
 from input_mode import InputMode
 
-isdebug = True #测试用
+isdebug = False#测试用
 
 myprint = Color()
 workpath = os.getcwd()
@@ -117,6 +118,7 @@ class ChinaUSearch(prototype):
     def webdriver_config(self):
         print("web driver_config")
         try:
+        # if True:
             # mapping = {
                 # "1" : ".pc",
                 # "2" : ".wap"
@@ -141,7 +143,8 @@ class ChinaUSearch(prototype):
             #fp.set_preference('permissions.default.image', 2)
             self.browser = webdriver.Firefox()
             # self.browser = webdriver.Chrome()
-            self.click_mode = ClickMode(self.browser, "d:\\selenium\\000.jb")
+            # self.click_mode = ClickMode(self.browser, "d:\\selenium\\000.jb")
+            self.click_mode=ClickMode(self.browser, self.server_id,self.db,isdebug,"d:\\selenium\\000.jb")
             self.input_mode = InputMode(self.browser)
             # self.profile_path = []
             # temp_folder = os.listdir("D:\\profile")
@@ -158,6 +161,7 @@ class ChinaUSearch(prototype):
         except Exception,e:
             print (u"配置浏览器失败,{0}".format(e))
             self.set_task_status(9)  # 任务提供的profileid 的path为NULL
+            self.update_task_allot_impl_sub()
             self.q.put(0)
             sys.exit(1)
     
@@ -464,6 +468,7 @@ def run():
         keyword = ret[0]['keyword'].decode("utf8")
         pids = psutil.pids() #进程号
         try:
+        # if True:
    #         while 1:#一直循环，实验用
             engine = ChinaUSearch(logger, db, taskid, q ,pids)
             print(u"建立引擎对象成功")
@@ -509,6 +514,7 @@ def run():
 def main():
     init() #配置任务
     try:
+    # if True:
         run()  #执行任务
     except Exception,e:
         myprint.print_red_text(u"引擎:执行任务失败{0}".format(e))

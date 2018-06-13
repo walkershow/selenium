@@ -5,24 +5,6 @@
 # Date              : 13.06.2018 14:40:1528872021
 # Last Modified Date: 13.06.2018 17:55:1528883743
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0p.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 13.06.2018 14:35:1528871731
-# Last Modified Date: 13.06.2018 14:38:1528871892
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0p.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 13.06.2018 14:30:1528871400
-# Last Modified Date: 13.06.2018 14:30:1528871400
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0p.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 13.06.2018 14:28:1528871316
-# Last Modified Date: 13.06.2018 14:28:1528871333
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -132,7 +114,7 @@ class ChinaUSearch(prototype):
             # else:
                 # self.origin_profile = res[0]['path']
             # print (self.origin_profile)
-            l = Link("/home/cp/.mozilla/firefox/btv8jtat.default",
+            l = Link("/home/pi/.mozilla/firefox/q9wwlcky.default",
                     'jid1-AVgCeF1zoVzMjA@jetpack.xpi',
                     'cookies.sqlite')
             l.link_ext("extensions", self.profile_id)
@@ -141,7 +123,8 @@ class ChinaUSearch(prototype):
 
             # fp = webdriver.FirefoxProfile(self.origin_profile)
             #fp.set_preference('permissions.default.image', 2)
-            self.browser = webdriver.Firefox()
+            fp = webdriver.FirefoxProfile("/home/pi/.mozilla/firefox/q9wwlcky.default")
+            self.browser = webdriver.Firefox(fp)
             # self.browser = webdriver.Chrome()
             # self.click_mode = ClickMode(self.browser, "d:\\selenium\\000.jb")
             self.click_mode=ClickMode(self.browser, self.server_id,self.db,isdebug,"d:\\selenium\\000.jb")

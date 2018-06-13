@@ -115,7 +115,7 @@ class ChinaUSearch(prototype):
                 # self.logger.error("can't get information profile_path")
             # self.origin_profile = res[0]['path']
             # print self.origin_profile
-            l = Link("/home/cp/.mozilla/firefox/btv8jtat.default",
+            l = Link("/home/pi/.mozilla/firefox/q9wwlcky.default",
                     'jid1-AVgCeF1zoVzMjA@jetpack.xpi',
                     'cookies.sqlite')
             l.link_ext("extensions", self.profile_id)
@@ -125,10 +125,10 @@ class ChinaUSearch(prototype):
             if isdebug == True:
                 self.browser = webdriver.Firefox()
             else:
-                self.browser = webdriver.Firefox()
-                # fp = webdriver.FirefoxProfile(self.origin_profile)
+                #self.browser = webdriver.Firefox()
+                fp = webdriver.FirefoxProfile("/home/pi/.mozilla/firefox/q9wwlcky.default")
                 # #fp.set_preference('permissions.default.image', 2)
-                # self.browser = webdriver.Firefox(fp)
+                self.browser = webdriver.Firefox(fp)
             # self.browser = webdriver.Chrome()
             self.click_mode=ClickMode(self.browser, self.server_id,self.db,isdebug,"d:\\selenium\\000.jb")
             self.input_mode=InputMode(self.browser)
@@ -837,7 +837,8 @@ def get_ip():  # 取得当前IP地址
 
 
 def write_ip_to_vm_cur_task(db,taskid):  # 写入到vm_cur_task里
-    ip = get_ip()
+    #ip = get_ip()
+    ip = '127.0.0.1'
     sql = "update vm_cur_task set ip='{0}' where id={1}".format(ip,taskid)
     ret = db.execute_sql(sql)
     if ret < 0:

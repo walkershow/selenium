@@ -174,7 +174,7 @@ class ChinaUSearch(prototype):
                 # self.logger.error("can't get information profile_path")
             # self.origin_profile = res[0]['path']
             
-            l = Link("/home/cp/.mozilla/firefox/btv8jtat.default",
+            l = Link("/home/pi/.mozilla/firefox/q9wwlcky.default",
                     'jid1-AVgCeF1zoVzMjA@jetpack.xpi',
                     'cookies.sqlite')
             l.link_ext("extensions", self.profile_id)
@@ -190,8 +190,8 @@ class ChinaUSearch(prototype):
                 if sys.platform == "win32":
                     self.browser = webdriver.Firefox()
                 else:
-                    self.browser = webdriver.Firefox()
-            # self.browser.set_page_load_timeout(30)
+                    fp = webdriver.FirefoxProfile("/home/pi/.mozilla/firefox/q9wwlcky.default")
+                    self.browser = webdriver.Firefox(fp)
             # self.browser.set_page_load_timeout(30)
             # self.browser = webdriver.Firefox(log_path='d:\\geckodriver.log')
 

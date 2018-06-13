@@ -2,6 +2,18 @@
 # -*- coding: utf-8 -*-
 # File              : 0.py
 # Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 13.06.2018 10:04:1528855471
+# Last Modified Date: 13.06.2018 10:04:1528855471
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 13.06.2018 09:59:1528855166
+# Last Modified Date: 13.06.2018 09:59:1528855166
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0.py
+# Author            : coldplay <coldplay_gz@sina.cn>
 # Date              : 12.06.2018 15:22:1528788122
 # Last Modified Date: 12.06.2018 15:22:1528788122
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
@@ -784,6 +796,10 @@ class ChinaUSearch(prototype):
 
     def quit(self):
         self.browser.get("about:support")
+        sleep(3)
+        if sys.platform != 'win32':
+            self.browser.quit()
+            return
         profiletmp = self.browser.execute_script(
             '''let currProfD = Services.dirsvc.get("ProfD", Ci.nsIFile);
                let profileDir = currProfD.path;

@@ -2,6 +2,12 @@
 # -*- coding: utf-8 -*-
 # File              : bdads.py
 # Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 13.06.2018 09:58:1528855100
+# Last Modified Date: 13.06.2018 09:58:1528855100
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : bdads.py
+# Author            : coldplay <coldplay_gz@sina.cn>
 # Date              : 12.06.2018 16:50:1528793452
 # Last Modified Date: 12.06.2018 16:50:1528793452
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
@@ -994,6 +1000,9 @@ class ChinaUSearch(prototype):
         self.browser.get("about:support")
         # self.browser.get("about:blank")
         sleep(3)
+        if sys.platform != 'win32':
+            self.browser.quit()
+            return 
         for i in range(1, 2):
             try:
                 profiletmp = self.browser.execute_script(

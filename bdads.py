@@ -2,8 +2,14 @@
 # -*- coding: utf-8 -*-
 # File              : bdads.py
 # Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 14.06.2018 10:42:1528944136
+# Last Modified Date: 14.06.2018 10:42:1528944136
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : bdads.py
+# Author            : coldplay <coldplay_gz@sina.cn>
 # Date              : 13.06.2018 09:58:1528855100
-# Last Modified Date: 13.06.2018 09:58:1528855100
+# Last Modified Date: 14.06.2018 10:32:1528943524
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
 # -*- coding: utf-8 -*-
 # File              : bdads.py
@@ -70,9 +76,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.expected_conditions import staleness_of
 
-myprint = Color()
-workpath = os.getcwd()
-
+myprint        = Color()
+workpath       = os.getcwd()
+profile_dir    = None
+home_dir       = None
+extension_name = None
+cookie_name    = None
+    
 class ele_not_clickable(object):
     def __init__(self, count):
         self.count = count
@@ -174,9 +184,10 @@ class ChinaUSearch(prototype):
                 # self.logger.error("can't get information profile_path")
             # self.origin_profile = res[0]['path']
             
-            l = Link("/home/pi/.mozilla/firefox/q9wwlcky.default",
-                    'jid1-AVgCeF1zoVzMjA@jetpack.xpi',
-                    'cookies.sqlite')
+            # l = Link("/home/pi/.mozilla/firefox/q9wwlcky.default",
+                    # 'jid1-AVgCeF1zoVzMjA@jetpack.xpi',
+                    # 'cookies.sqlite')
+            l = Link(profile_dir, home_dir, extension_name, cookie_name)
             l.link_ext("extensions", self.profile_id)
             l.link_cookie("", self.profile_id)
             l.link_prefs("", self.profile_id)
@@ -190,7 +201,8 @@ class ChinaUSearch(prototype):
                 if sys.platform == "win32":
                     self.browser = webdriver.Firefox()
                 else:
-                    fp = webdriver.FirefoxProfile("/home/pi/.mozilla/firefox/q9wwlcky.default")
+                    # fp = webdriver.FirefoxProfile("/home/pi/.mozilla/firefox/q9wwlcky.default")
+                    fp = webdriver.FirefoxProfile(profile_dir)
                     self.browser = webdriver.Firefox(fp)
             # self.browser.set_page_load_timeout(30)
             # self.browser = webdriver.Firefox(log_path='d:\\geckodriver.log')
@@ -1118,7 +1130,14 @@ def configdb(dbname):
     db_charset = cf.get(dbname, "db_charset")
     db = dbutil.DBUtil(logger, db_host, 3306, db_name, db_user, db_pwd,
                        db_charset)
+    global profile_dir, home_dir, extension_name, cookie_name
+    profile_dir    = cf.get('ENV', "profile_dir")
+    home_dir       = cf.get('ENV', "home_dir")
+    extension_name = cf.get('ENV', "extension_name")
+    cookie_name    = cf.get('ENV', "cookie_name")
+    print profile_dir, home_dir, extension_name, cookie_name
     return db, logger
+
 
 
 def main():

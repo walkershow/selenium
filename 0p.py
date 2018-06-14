@@ -2,8 +2,14 @@
 # -*- coding: utf-8 -*-
 # File              : 0p.py
 # Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 14.06.2018 10:43:1528944185
+# Last Modified Date: 14.06.2018 10:43:1528944185
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0p.py
+# Author            : coldplay <coldplay_gz@sina.cn>
 # Date              : 13.06.2018 14:40:1528872021
-# Last Modified Date: 13.06.2018 17:55:1528883743
+# Last Modified Date: 14.06.2018 10:39:1528943982
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -48,6 +54,10 @@ isdebug = False#测试用
 
 myprint = Color()
 workpath = os.getcwd()
+profile_dir    = None
+home_dir       = None
+extension_name = None
+cookie_name    = None
 
 def drawSquare():
     rangeList = [
@@ -114,16 +124,14 @@ class ChinaUSearch(prototype):
             # else:
                 # self.origin_profile = res[0]['path']
             # print (self.origin_profile)
-            l = Link("/home/pi/.mozilla/firefox/q9wwlcky.default",
-                    'jid1-AVgCeF1zoVzMjA@jetpack.xpi',
-                    'cookies.sqlite')
+            l = Link(profile_dir, home_dir, extension_name, cookie_name)
             l.link_ext("extensions", self.profile_id)
             l.link_cookie("", self.profile_id)
             l.link_prefs("", self.profile_id)
 
             # fp = webdriver.FirefoxProfile(self.origin_profile)
             #fp.set_preference('permissions.default.image', 2)
-            fp = webdriver.FirefoxProfile("/home/pi/.mozilla/firefox/q9wwlcky.default")
+            fp = webdriver.FirefoxProfile(profile_dir)
             self.browser = webdriver.Firefox(fp)
             # self.browser = webdriver.Chrome()
             # self.click_mode = ClickMode(self.browser, "d:\\selenium\\000.jb")
@@ -438,6 +446,11 @@ def configdb(dbname):
     db_pwd = cf.get(dbname,"db_pwd")
     db_charset = cf.get(dbname,"db_charset")
     db=DBUtil(logger,db_host,3306,db_name,db_user,db_pwd,db_charset)
+    global profile_dir, home_dir, extension_name, cookie_name
+    profile_dir    = cf.get('ENV', "profile_dir")
+    home_dir       = cf.get('ENV', "home_dir")
+    extension_name = cf.get('ENV', "extension_name")
+    cookie_name    = cf.get('ENV', "cookie_name")
     return db,logger
 
 def run():

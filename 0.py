@@ -2,6 +2,30 @@
 # -*- coding: utf-8 -*-
 # File              : 0.py
 # Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 14.06.2018 10:49:1528944558
+# Last Modified Date: 14.06.2018 10:49:1528944558
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 14.06.2018 10:42:1528944169
+# Last Modified Date: 14.06.2018 10:42:1528944169
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 14.06.2018 10:38:1528943883
+# Last Modified Date: 14.06.2018 10:38:1528943883
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 14.06.2018 10:37:1528943841
+# Last Modified Date: 14.06.2018 10:37:1528943841
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0.py
+# Author            : coldplay <coldplay_gz@sina.cn>
 # Date              : 13.06.2018 14:30:1528871414
 # Last Modified Date: 13.06.2018 14:30:1528871414
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
@@ -52,6 +76,10 @@ from click_mode import ClickMode
 from input_mode import InputMode
 myprint = Color()
 workpath = os.getcwd()
+profile_dir    = None
+home_dir       = None
+extension_name = None
+cookie_name    = None
 
 isdebug = False
 
@@ -115,9 +143,7 @@ class ChinaUSearch(prototype):
                 # self.logger.error("can't get information profile_path")
             # self.origin_profile = res[0]['path']
             # print self.origin_profile
-            l = Link("/home/pi/.mozilla/firefox/q9wwlcky.default",
-                    'jid1-AVgCeF1zoVzMjA@jetpack.xpi',
-                    'cookies.sqlite')
+            l = Link(profile_dir, home_dir, extension_name, cookie_name)
             l.link_ext("extensions", self.profile_id)
             l.link_cookie("", self.profile_id)
             l.link_prefs("", self.profile_id)
@@ -126,12 +152,13 @@ class ChinaUSearch(prototype):
                 self.browser = webdriver.Firefox()
             else:
                 #self.browser = webdriver.Firefox()
-                fp = webdriver.FirefoxProfile("/home/pi/.mozilla/firefox/q9wwlcky.default")
+                fp = webdriver.FirefoxProfile(profile_dir)
                 # #fp.set_preference('permissions.default.image', 2)
                 self.browser = webdriver.Firefox(fp)
             # self.browser = webdriver.Chrome()
             self.click_mode=ClickMode(self.browser, self.server_id,self.db,isdebug,"d:\\selenium\\000.jb")
             self.input_mode=InputMode(self.browser)
+            self.browser.maximize_window()
         except Exception,e:
             print (u"配置浏览器失败,{0}".format(e))
             self.set_task_status(9)  # 任务提供的profileid 的path为NULL
@@ -826,6 +853,11 @@ def configdb(dbname):
     db_pwd = cf.get(dbname,"db_pwd")
     db_charset = cf.get(dbname,"db_charset")
     db=DBUtil(logger,db_host,3306,db_name,db_user,db_pwd,db_charset)
+    global profile_dir, home_dir, extension_name, cookie_name
+    profile_dir    = cf.get('ENV', "profile_dir")
+    home_dir       = cf.get('ENV', "home_dir")
+    extension_name = cf.get('ENV', "extension_name")
+    cookie_name    = cf.get('ENV', "cookie_name")
     return db,logger
 
 

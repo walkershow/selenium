@@ -3,7 +3,7 @@
 # File              : link.py
 # Author            : coldplay <coldplay_gz@sina.cn>
 # Date              : 06.04.2018 11:54:1522986848
-# Last Modified Date: 12.06.2018 15:21:1528788097
+# Last Modified Date: 14.06.2018 10:56:1528945010
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
 # coding=utf-8
 
@@ -12,19 +12,19 @@ import logging.config
 import traceback
 import os
 
-homedir = "/home/cp"
 
 class Link(object):
-    def __init__(self, profile_path, ext_name, cookie_name,
+    def __init__(self, profile_path, homedir, ext_name, cookie_name,
             prefs_name='prefs.js'):
         self.ext_name = ext_name
         self.cookie_name = cookie_name
         self.profile_path = profile_path
         self.prefs_name = prefs_name
+        self.homedir = homedir
 
 
     def get_task_profile_path(self, task_id):
-        ppath = homedir+"/profile/"+str(task_id)
+        ppath = self.homedir+"/profile/"+str(task_id)
         return ppath
 
 
@@ -54,7 +54,7 @@ class Link(object):
         self.link(prefs_dir, self.prefs_name, profile_id)
 
 if __name__ == '__main__':
-    l = Link("/home/cp/.mozilla/firefox/btv8jtat.default",
+    l = Link("/home/cp/.mozilla/firefox/btv8jtat.default",'/home/cp',
             'jid1-AVgCeF1zoVzMjA@jetpack.xpi',
             'cookies.sqlite')
     # l.link_ext("extensions", 1)

@@ -162,6 +162,7 @@ class ChinaUSearch(prototype):
         self.terminal_type = task["terminal_type"]  # 终端
         self.profile_type = task["terminal_type"]
         self.onlysearch = task["onlysearch"]
+        self.real_url = task["real_url"]
         self.random_event_count = 0
         self.module = importlib.import_module(
             "script.{script_name}".format(script_name=self.script_name))
@@ -336,15 +337,20 @@ class ChinaUSearch(prototype):
             self.click_mode.signal_pausing()
             self.browser.get('''https://m.baidu.com''')
             sleep(1)
+            elename = ""
             try:
                 input_block = self.Wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input#index-kw")))
+                elename = "index-kw"
             except Exception,e:
                 input_block = self.Wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input#word")))
+                elename = "word"
             randnum = random.randint(0, 1)
             if randnum == 0:
-                self.input_mode.input_pinyin(input_block, keyword, "index-kw")
+                print(u"输入法拼音")
+                self.input_mode.input_pinyin(input_block, keyword, elename)#"index-kw")
             elif randnum == 1:
-                self.input_mode.input_wubi(input_block, keyword, "index-kw")
+                print(u"输入法五笔")
+                self.input_mode.input_wubi(input_block, keyword, elename)#"index-kw")
 
             sleep(2)
             input_block.send_keys(Keys.ENTER)
@@ -377,6 +383,11 @@ class ChinaUSearch(prototype):
         elif self.method == "showurl":
             try:
                 a_tag = block.find_element_by_css_selector(".c-showurl")
+                t = a_tag.text
+                if t.find(self.url) != -1:
+                    return True
+                else:
+                    return False
             except Exception, e:
                 if self.is_ad == 0:
                     return False
@@ -439,6 +450,7 @@ class ChinaUSearch(prototype):
                 try:
                     a_tag = block.find_element_by_css_selector("div.c-showurl")
                     if a_tag.text.find(self.url) != -1:
+                        myprint.print_green_text(u'''找到链接标题:{0}'''.format(a_tag.text))
                         return True
                     else:
                         return False
@@ -449,6 +461,7 @@ class ChinaUSearch(prototype):
                 if a_tag is not None:
                     print a_tag.text
                     if a_tag.text.find(self.title) != -1:
+                        myprint.print_green_text(u'''找到链接标题:{0}'''.format(a_tag.text))
                         return True
                     else:
                         return False
@@ -475,22 +488,39 @@ class ChinaUSearch(prototype):
         pyautogui.click()
         sleep(10)
 
+    def get_element_height(self,ele):
+        return ele.size['height']
+      #  h = self.browser.execute_script('''function getElementHeight(element){return element.clientHeight;};return getElementHeight(arguments[0]);''',ele)
+    def get_element_width(self,ele):
+        return ele.size['width']
+        #h = self.browser.execute_script('''function getElementWidth(element){return element.clientWidth;};return getElementWidth(arguments[0]);''',ele)
+
     def process_block(self, title,offtop=0):
         try:
-            a_tag = title.find_element_by_tag_name("a")
-            myprint.print_green_text(u'''找到链接标题:{0}'''.format(a_tag.text))
-            w, h =  GetTitleDimensions(a_tag.text)
+            try:
+                a_tag = title.find_element_by_tag_name("a")
+            except Exception,e:
+                a_tag = title #因为有可能div里找不到a 所以直接点击整个div
+            print("1")
+            self.browser.execute_script("return arguments[0].scrollIntoView();", title)
+            sleep(1)
+           # w, h =  GetTitleDimensions(a_tag.text)
+            w = self.get_element_width(a_tag)
+            h = self.get_element_height(a_tag)
             availHeight = self.browser.execute_script(
                 "return window.document.documentElement.clientHeight;")
             top = self.browser.execute_script(
                 '''function getElementViewTop(element){var actualTop=element.offsetTop;var current=element.offsetParent;while(current!==null){actualTop+=current.offsetTop;current=current.offsetParent}if(document.compatMode=="BackCompat"){var elementScrollTop=document.body.scrollTop}else{var elementScrollTop=document.documentElement.scrollTop}return actualTop-elementScrollTop};return getElementViewTop(arguments[0])''',
                 title)
-            if top < 200:
-                self.browser.execute_script(
-                    "return arguments[0].scrollIntoView();", title)
+            if top < 200:#位置太高，有可能被挡到，#先滚到最顶部，再移动标题处，再向下滚200
+                self.browser.execute_script("window.scrollBy(0, 0);")
+                self.browser.execute_script("return arguments[0].scrollIntoView();", title)
                 self.browser.execute_script("window.scrollBy(0, -200);")
-            drawSquare()
-            a_tag = title.find_element_by_css_selector("a:first-child")
+            #drawSquare()
+            try:
+                a_tag = title.find_element_by_css_selector("a:first-child")
+            except Exception,e:
+                a_tag = title
             print a_tag.get_attribute("href")
             left = self.browser.execute_script(
                 '''function getElementViewLeft(element){var actualLeft=element.offsetLeft;var current=element.offsetParent;while(current!==null){actualLeft+=current.offsetLeft;current=current.offsetParent}if(document.compatMode=="BackCompat"){var elementScrollLeft=document.body.scrollLeft}else{var elementScrollLeft=document.documentElement.scrollLeft}return actualLeft-elementScrollLeft};return getElementViewLeft(arguments[0])''',
@@ -501,13 +531,15 @@ class ChinaUSearch(prototype):
             #用script首页后,之后继续打开可能会出现窗口数更之前一样,导致wait超时
             self.click_mode.signal_pausing()
             w_a = random.randint(0,w)
-            h_a = random.randint(1,h)
+            h_a = random.randint(2,h-2)
             print("top:{0} left:{1} w:{2} h:{3} h_a:{4} w_a:{5}".format(top,left,w,h,h_a,w_a))
             self.click_mode.click(top+h_a+offtop, left+w_a, a_tag,100, self.cm)
             sleep(3)
+            return 0
         except Exception,e:
             myprint.print_red_text(u"点击出错:"+str(e))
             sleep(5)
+            return -1
 
     def move_to_next_btn(self, ele, step=110, p_ctrl=False):
         availHeight = self.browser.execute_script(
@@ -565,13 +597,13 @@ class ChinaUSearch(prototype):
             h = self.browser.execute_script("return document.body.clientHeight")#document.body.scrollHeight")
             sh = 0
             while 1:
-                scroll_h = random.randint(20,100)
+                scroll_h = random.randint(50,200)
                 sh += scroll_h
                 self.browser.execute_script("window.scrollTo(0,{0})".format(sh))
                 h = h - scroll_h
                 if h < 0:
                     break
-                wt = random.randint(10,20)
+                wt = random.randint(0,10)
                 sleep(wt/10)
             return 0
         except Exception,e:
@@ -638,6 +670,34 @@ class ChinaUSearch(prototype):
         else:
             return False
 
+    def is_url_ok(self):#判断是否打开的网页是正确的
+        try:
+            if self.real_url == "":
+                myprint.print_green_text(u"real_url为空，无法判断目标是否正确")
+                return 0
+            if self.method == "title":
+                myprint.print_green_text(u"搜索类型是‘标题’,无法判断目标URL")
+                return 0
+            selector = "a"
+            sleep(5)
+            self.switch_to_new_windows()
+            a_tags = self.element_all(By.TAG_NAME, selector)
+            cur_url = self.browser.current_url
+            myprint.print_blue_text(u"当前打开的目标网址为:{0}".format( cur_url) )
+
+            if cur_url.find(self.real_url) != -1:
+                myprint.print_green_text(u"目标URL正确")
+                return 0
+            else:
+                myprint.print_green_text(u"目标URL错误")
+                print(u"当前URL："+ cur_url)
+                print(u"目标URL:" + self.real_url)
+                sleep(10)
+                return -1
+        except Exception,e:
+            self.logger.error(u"判断目标URL时 错误:"+str(e))
+            return -1
+
     def baiduSearchPhone(self):
         myprint.print_green_text(u"引擎:开始进去手机百度")
         self.baidu_search_phone(self.keyword)
@@ -654,15 +714,28 @@ class ChinaUSearch(prototype):
             self.go_to_page_bottom()
             sleep(4)
             myprint.print_green_text(u"引擎:开始第{page}页搜索".format(page=count))
-            divs = self.Wait.until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR,
-                                                     "div.c-container")))
+            try:
+                divs = self.Wait.until(
+                    EC.presence_of_all_elements_located((By.CSS_SELECTOR,
+                                                         "div.c-container")))
+            except Exception,e:
+                divs = self.Wait.until(
+                    EC.presence_of_all_elements_located((By.CSS_SELECTOR,
+                                                         "div.abs")))#有时候是这个
+
             for div in divs:
                 # if random.random() < 0.2:
                 #     self.process_block(div)
                 if self.satisfy_condition_phone(div):
-                    self.process_block(div,8)
-                    return 1
+                    rt = self.process_block(div,8)
+                    if rt == 0:
+                        rt = self.is_url_ok()
+                        if rt == 0:
+                            return 0
+                        else:
+                            return 3
+                    else:
+                        return -1
             count = count + 1
             myprint.print_green_text(
                 u"引擎:第{page}页搜索失败!尝试进入下一页".format(page=count))
@@ -702,17 +775,31 @@ class ChinaUSearch(prototype):
                                     # print titles
                                     # print div.text
                                     if self.satisfy_condition(div):
-                                        self.process_block(div)
-                                        return True
+                                        rt = self.process_block(div)
+                                        if rt == 0:
+                                            rt = self.is_url_ok()
+                                            if rt == 0:
+                                                return 0
+                                            else:
+                                                return 3 #打开的网页非目标页，可能是因为点击错误
+                                        else:
+                                            return -1
                         else:
                             divs = self.Wait.until(
                                 EC.presence_of_all_elements_located(
                                     (By.CSS_SELECTOR, "h3.t")))
                         for div in divs:
                             if self.satisfy_condition(div):
-                                self.process_block(div)
-                                return True
-                    return False
+                                rt = self.process_block(div)
+                                if rt == 0:
+                                    rt = self.is_url_ok()
+                                    if rt == 0:
+                                        return 0
+                                    else:
+                                        return 3 #打开的网页非目标页，可能是因为点击错误
+                                else:
+                                    return -1
+                    return -1
                 except StaleElementReferenceException, e:
                     myprint.print_red_text("stale retry2")
                     stale = True
@@ -721,10 +808,10 @@ class ChinaUSearch(prototype):
                 except NoSuchElementException, e:
                     myprint.print_red_text(u"进入下一页错误,刷新:{0}".format(e))
                     self.logger.error(u"进入下一页错误,刷新:{0}".format(e))
-                    return False
+                    return -1
             break
 
-        return False
+        return -1
 
     def jump_to_startpage(self, nums):
         for i in nums:
@@ -766,8 +853,10 @@ class ChinaUSearch(prototype):
             # sleep(5)
             pagenum = startpage+count
             ret = self.handle_page(pagenum)
-            if ret:
+            if ret == 0:
                 return 1
+            elif ret == 3:#有找到并点击进去，但打开后的页面不是指定的目标页面，可能是点击错
+                return 3
             myprint.print_green_text(
                 u"引擎:第{page}页搜索失败!尝试进入下一页".format(page=pagenum))
             count = count + 1
@@ -895,6 +984,13 @@ class ChinaUSearch(prototype):
                         self.update_search_times()
                         self.update_task_allot_impl_sub()
                         self.quit(0)
+                    elif ret == 3:
+                        myprint.print_red_text(u"引擎:打开的网页非目标页面")
+                        self.logger.error(u"打开的网页非目标页面状态改12")
+                        self.set_task_status(12)
+                        self.update_search_times()
+                        self.update_task_allot_impl_sub()
+                        self.quit(0)
                     else:
                         myprint.print_red_text(u"引擎:搜索失败, 没有找到目标")
                         self.logger.error(u"搜索不到目标，任务状态改为8")
@@ -911,6 +1007,13 @@ class ChinaUSearch(prototype):
                         myprint.print_red_text(u"引擎:搜索失败, 一到最后一页")
                         self.logger.error(u"搜到到最后一任务状态改11")
                         self.set_task_status(11)
+                        self.update_search_times()
+                        self.update_task_allot_impl_sub()
+                        self.quit(0)
+                    elif ret == 3:
+                        myprint.print_red_text(u"引擎:打开的网页非目标页面")
+                        self.logger.error(u"打开的网页非目标页面状态改12")
+                        self.set_task_status(12)
                         self.update_search_times()
                         self.update_task_allot_impl_sub()
                         self.quit(0)

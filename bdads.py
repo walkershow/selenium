@@ -5,25 +5,6 @@
 # Date              : 14.06.2018 10:42:1528944136
 # Last Modified Date: 14.06.2018 10:42:1528944136
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : bdads.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 13.06.2018 09:58:1528855100
-# Last Modified Date: 14.06.2018 10:32:1528943524
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : bdads.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 12.06.2018 16:50:1528793452
-# Last Modified Date: 12.06.2018 16:50:1528793452
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : bdads.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 12.06.2018 15:21:1528788093
-# Last Modified Date: 12.06.2018 15:21:1528788093
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-
 import ConfigParser
 import importlib
 import logging
@@ -82,6 +63,7 @@ profile_dir    = None
 home_dir       = None
 extension_name = None
 cookie_name    = None
+g_step         = 150
     
 class ele_not_clickable(object):
     def __init__(self, count):
@@ -163,6 +145,7 @@ class ChinaUSearch(prototype):
         self.profile_type = task["terminal_type"]
         self.onlysearch = task["onlysearch"]
         self.real_url = task["real_url"]
+        self.origin_cookie = ""
         self.random_event_count = 0
         self.module = importlib.import_module(
             "script.{script_name}".format(script_name=self.script_name))
@@ -189,6 +172,10 @@ class ChinaUSearch(prototype):
                     # 'jid1-AVgCeF1zoVzMjA@jetpack.xpi',
                     # 'cookies.sqlite')
             l = Link(profile_dir, home_dir, extension_name, cookie_name)
+            self.origin_cookie = os.path.join(home_dir, "profile")
+            self.origin_cookie = os.path.join(self.origin_cookie, str(self.profile_id))
+            self.origin_cookie = os.path.join(self.origin_cookie, cookie_name)
+            print "cookie_name:", self.origin_cookie
             l.link_ext("extensions", self.profile_id)
             l.link_cookie("", self.profile_id)
             l.link_prefs("", self.profile_id)
@@ -533,7 +520,7 @@ class ChinaUSearch(prototype):
             w_a = random.randint(0,w)
             h_a = random.randint(2,h-2)
             print("top:{0} left:{1} w:{2} h:{3} h_a:{4} w_a:{5}".format(top,left,w,h,h_a,w_a))
-            self.click_mode.click(top+h_a+offtop, left+w_a, a_tag,100, self.cm)
+            self.click_mode.click(top+h_a+offtop, left+w_a, a_tag,g_step-10, self.cm)
             sleep(3)
             return 0
         except Exception,e:
@@ -541,7 +528,7 @@ class ChinaUSearch(prototype):
             sleep(5)
             return -1
 
-    def move_to_next_btn(self, ele, step=110, p_ctrl=False):
+    def move_to_next_btn(self, ele, step=g_step, p_ctrl=False):
         availHeight = self.browser.execute_script(
             "return window.document.documentElement.clientHeight;")
         top = self.browser.execute_script(
@@ -1085,7 +1072,7 @@ class ChinaUSearch(prototype):
                     Keys.CONTROL).click(randa).key_up(Keys.CONTROL).perform()
                 # self.process_block(randa)
                 #移动点击
-                # self.move_to_next_btn(randa, 110, True)
+                # self.move_to_next_btn(randa, g_step, True)
                 # randa.click()
                 break
         except Exception, e:
@@ -1115,24 +1102,25 @@ class ChinaUSearch(prototype):
         self.browser.get("about:support")
         # self.browser.get("about:blank")
         sleep(3)
-        if sys.platform != 'win32':
-            self.browser.quit()
-            return 
         for i in range(1, 2):
             try:
                 profiletmp = self.browser.execute_script(
                     '''let currProfD = Services.dirsvc.get("ProfD", Ci.nsIFile);
-
                     let profileDir = currProfD.path;
-
                     return profileDir
 
                     ''')
+                cookietmp = os.path.join(profiletmp, cookie_name)
 
                 if self.copy_cookie == 1 and bcopy == 1:
-                    if os.system("XCOPY /E /Y /C " + profiletmp + "\*.* " +
-                                 self.origin_profile):
-                        print "files should be copied :/"
+                    if sys.platform == 'win32':
+                        if os.system("XCOPY /E /Y /C " + profiletmp + "\*.* " +
+                                     self.origin_profile):
+                            print "files should be copied :/"
+                    else:
+                        if os.system("cp " + cookietmp + " "+ 
+                                     self.origin_cookie):
+                            print "files should be copied :/"
                     sleep(4)
                 # self.browser.quit()
                 # shutil.rmtree(profiletmp, True)

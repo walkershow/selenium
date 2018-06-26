@@ -103,6 +103,7 @@ class ChinaUSearch(prototype):
         self.profile_type = profile_type
         self.webdriver_config()
         self.logger = logger
+        self.origin_cookie = ""
         self.script = Script(self.browser,logger)
         myprint.print_green_text(u"引擎:初始化浏览器成功")
 
@@ -125,6 +126,10 @@ class ChinaUSearch(prototype):
                 # self.origin_profile = res[0]['path']
             # print (self.origin_profile)
             l = Link(profile_dir, home_dir, extension_name, cookie_name)
+            self.origin_cookie = os.path.join(home_dir, "profile")
+            self.origin_cookie = os.path.join(self.origin_cookie, str(self.profile_id))
+            self.origin_cookie = os.path.join(self.origin_cookie, cookie_name)
+            print "cookie_name:", self.origin_cookie
             l.link_ext("extensions", self.profile_id)
             l.link_cookie("", self.profile_id)
             l.link_prefs("", self.profile_id)
@@ -417,10 +422,18 @@ class ChinaUSearch(prototype):
                return profileDir
             '''
         )
-        if os.system("XCOPY /E /Y /C " + profiletmp + "\cookies.sqlite " + self.origin_profile):
-            print "files should be copied :/"
-        shutil.rmtree(profiletmp, True)
+        cookietmp = os.path.join(profiletmp, cookie_name)
+        if self.copy_cookie == 1:
+            if sys.platform == 'win32':
+                if os.system("XCOPY /E /Y /C " + profiletmp + "\*.* " +
+                             self.origin_profile):
+                    print "files should be copied :/"
+            else:
+                if os.system("cp " + cookietmp + " "+ 
+                             self.origin_cookie):
+                    print "files should be copied :/"
         self.browser.quit()
+        shutil.rmtree(profiletmp, True)
 
 def init():
     myprint.print_green_text(u"程序初始化中")

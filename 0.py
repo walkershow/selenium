@@ -5,37 +5,6 @@
 # Date              : 14.06.2018 10:49:1528944558
 # Last Modified Date: 14.06.2018 10:49:1528944558
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 14.06.2018 10:42:1528944169
-# Last Modified Date: 14.06.2018 10:42:1528944169
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 14.06.2018 10:38:1528943883
-# Last Modified Date: 14.06.2018 10:38:1528943883
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 14.06.2018 10:37:1528943841
-# Last Modified Date: 14.06.2018 10:37:1528943841
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 13.06.2018 14:30:1528871414
-# Last Modified Date: 13.06.2018 14:30:1528871414
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 13.06.2018 14:29:1528871353
-# Last Modified Date: 13.06.2018 14:29:1528871362
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-
 from contextlib import contextmanager
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -126,6 +95,7 @@ class ChinaUSearch(prototype):
         self.logger = logger
         self.detialpage_div = None
         self.detialpage_url = []
+        self.origin_cookie = ""
         self.script = Script(self.browser,logger)   
         myprint.print_green_text(u"引擎:初始化浏览器成功")
 
@@ -144,6 +114,10 @@ class ChinaUSearch(prototype):
             # self.origin_profile = res[0]['path']
             # print self.origin_profile
             l = Link(profile_dir, home_dir, extension_name, cookie_name)
+            self.origin_cookie = os.path.join(home_dir, "profile")
+            self.origin_cookie = os.path.join(self.origin_cookie, str(self.profile_id))
+            self.origin_cookie = os.path.join(self.origin_cookie, cookie_name)
+            print "cookiename:", self.origin_cookie
             l.link_ext("extensions", self.profile_id)
             l.link_cookie("", self.profile_id)
             l.link_prefs("", self.profile_id)
@@ -810,22 +784,29 @@ class ChinaUSearch(prototype):
             return False
 
     def quit(self):
+        print("quit...")
         self.browser.get("about:support")
         sleep(3)
-        if sys.platform != 'win32':
-            self.browser.quit()
-            return
         profiletmp = self.browser.execute_script(
             '''let currProfD = Services.dirsvc.get("ProfD", Ci.nsIFile);
                let profileDir = currProfD.path;
                return profileDir
             '''
         )
+        cookietmp = os.path.join(profiletmp, cookie_name)
         if self.copy_cookie == 1:
-            if os.system("XCOPY /E /Y /C " + profiletmp + "\*.* " + self.origin_profile):
-                print "files should be copied :/"
+            if sys.platform == 'win32':
+                if os.system("XCOPY /E /Y /C " + profiletmp + "\*.* " +
+                             self.origin_profile):
+                    print "files should be copied :/"
+            else:
+                cmd = "cp " + cookietmp + " "+ self.origin_cookie
+                print ("cmd:",cmd)
+                if os.system("cp " + cookietmp + " "+ self.origin_cookie):
+                    print "files should be copied :/"
+        sleep(3)
         self.browser.quit()
-        sleep(5)
+        sleep(3)
         shutil.rmtree(profiletmp, True)
 
 

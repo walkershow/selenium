@@ -2,8 +2,38 @@
 # -*- coding: utf-8 -*-
 # File              : 0.py
 # Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 27.06.2018 11:07:1530068870
+# Last Modified Date: 27.06.2018 11:07:1530068870
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 27.06.2018 11:07:1530068862
+# Last Modified Date: 27.06.2018 11:07:1530068862
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 27.06.2018 11:03:1530068637
+# Last Modified Date: 27.06.2018 11:03:1530068637
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 27.06.2018 10:45:1530067522
+# Last Modified Date: 27.06.2018 10:45:1530067522
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 27.06.2018 10:45:1530067510
+# Last Modified Date: 27.06.2018 10:45:1530067510
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0.py
+# Author            : coldplay <coldplay_gz@sina.cn>
 # Date              : 14.06.2018 10:49:1528944558
-# Last Modified Date: 14.06.2018 10:49:1528944558
+# Last Modified Date: 27.06.2018 10:42:1530067343
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
 from contextlib import contextmanager
 from selenium import webdriver
@@ -21,7 +51,7 @@ import importlib
 
 from time import sleep
 from dbutil import DBUtil
-from pypinyin import pinyin, lazy_pinyin,Style
+from pypinyin import pinyin, lazy_pinyin, Style
 import wubi
 import optparse
 import ConfigParser
@@ -45,30 +75,22 @@ from click_mode import ClickMode
 from input_mode import InputMode
 myprint = Color()
 workpath = os.getcwd()
-profile_dir    = None
-home_dir       = None
+profile_dir = None
+home_dir = None
 extension_name = None
-cookie_name    = None
+cookie_name = None
 
 isdebug = False
 
+
 def drawSquare():
-    rangeList = [
-        (0, 360),
-        (100, 200),
-        (0, 100),
-        (140, 200),
-        (24, 320),
-        (60, 120),
-        (120, 180),
-        (180, 240),
-        (240, 300)
-    ]
+    rangeList = [(0, 360), (100, 200), (0, 100), (140, 200), (24, 320),
+                 (60, 120), (120, 180), (180, 240), (240, 300)]
     randnum = random.randint(0, len(rangeList) - 1)
     rangex = rangeList[randnum][0]
     rangey = rangeList[randnum][1]
     width, height = pyautogui.size()
-    roll = random.randint(height/2,2*height/3)
+    roll = random.randint(height / 2, 2 * height / 3)
     r = 250
     s = random.randint(2, 5)
     o_x = width / s
@@ -86,36 +108,37 @@ def drawSquare():
     pyautogui.moveTo(190, 0)
     pyautogui.moveTo(190, roll, duration=s)
 
+
 class ChinaUSearch(prototype):
-    def __init__(self,logger,db,task_id,q,pids):
-        super(ChinaUSearch, self).__init__(logger,db,task_id,q,pids)
+    def __init__(self, logger, db, task_id, q, pids):
+        super(ChinaUSearch, self).__init__(logger, db, task_id, q, pids)
         myprint.print_green_text(u"引擎:配置浏览器")
         self.profile_type = 1
         self.webdriver_config()
         self.logger = logger
         self.detialpage_div = None
         self.detialpage_url = []
-        self.origin_cookie = ""
-        self.script = Script(self.browser,logger)   
+        self.origin_cookie = None
+        self.script = Script(self.browser, logger)
         myprint.print_green_text(u"引擎:初始化浏览器成功")
-
 
     #虚拟机上浏览器的配置
     def webdriver_config(self):
         try:
             # mapping = {
-                # "1" : ".pc",
-                # "2" : ".wap"
+            # "1" : ".pc",
+            # "2" : ".wap"
             # }
             # sql = "select path from profiles where id = {profile_id}".format(profile_id=self.profile_id)
             # res = self.db.select_sql(sql, 'DictCursor')
             # if res is None or len(res) == 0:
-                # self.logger.error("can't get information profile_path")
+            # self.logger.error("can't get information profile_path")
             # self.origin_profile = res[0]['path']
             # print self.origin_profile
             l = Link(profile_dir, home_dir, extension_name, cookie_name)
             self.origin_cookie = os.path.join(home_dir, "profile")
-            self.origin_cookie = os.path.join(self.origin_cookie, str(self.profile_id))
+            self.origin_cookie = os.path.join(self.origin_cookie,
+                                              str(self.profile_id))
             self.origin_cookie = os.path.join(self.origin_cookie, cookie_name)
             print "cookiename:", self.origin_cookie
             l.link_ext("extensions", self.profile_id)
@@ -130,100 +153,104 @@ class ChinaUSearch(prototype):
                 # #fp.set_preference('permissions.default.image', 2)
                 self.browser = webdriver.Firefox(fp)
             # self.browser = webdriver.Chrome()
-            self.click_mode=ClickMode(self.browser, self.server_id,self.db,isdebug,"d:\\selenium\\000.jb")
-            self.input_mode=InputMode(self.browser)
+            self.click_mode = ClickMode(self.browser, self.server_id, self.db,
+                                        isdebug, "d:\\selenium\\000.jb")
+            self.input_mode = InputMode(self.browser)
             self.browser.maximize_window()
-        except Exception,e:
-            print (u"配置浏览器失败,{0}".format(e))
+        except Exception, e:
+            print(u"配置浏览器失败,{0}".format(e))
             self.set_task_status(9)  # 任务提供的profileid 的path为NULL
             self.q.put(0)
             sys.exit(1)
 
-
     #搜狗搜索
-    def sogou_search(self,keyword,num):
+    def sogou_search(self, keyword, num):
         try:
             self.browser.get('''https://www.sogou.com''')
             sleep(1)
             self.update_db_log()
             self.success_add()
-            input_block = self.browser.find_element_by_xpath('''//*[@id="query"]''')
+            input_block = self.browser.find_element_by_xpath(
+                '''//*[@id="query"]''')
             self.input_mode.input(input_block, keyword, "query")
             input_block.send_keys(Keys.ENTER)
             sleep(2)
             if self.random_click_on_page(num):
-                for i in range(random.randint(1,3)):
+                for i in range(random.randint(1, 3)):
                     self.go_to_next_page(num)
                     self.random_click_on_page(num)
                 return True
             else:
                 return False
-        except Exception,e:
+        except Exception, e:
             self.logger.error(e)
             return False
 
     # 360搜索
-    def so_search(self,keyword,num):
+    def so_search(self, keyword, num):
         try:
             self.browser.get('''https://www.so.com''')
             sleep(1)
+            return True
             self.update_db_log()
             self.success_add()
-            input_block = self.script.find_elem("id","input")
+            input_block = self.script.find_elem("id", "input")
             self.input_mode.input(input_block, keyword, "input")
             input_block.send_keys(Keys.ENTER)
             sleep(2)
             if self.random_click_on_page(num):
-                for i in range(random.randint(1,3)):
+                for i in range(random.randint(1, 3)):
                     self.go_to_next_page(num)
                     self.random_click_on_page(num)
                 return True
             else:
                 return False
-        except Exception,e:
+        except Exception, e:
             self.logger.error(e)
             return False
 
     # 百度搜索
-    def baidu_search(self,keyword,num):
+    def baidu_search(self, keyword, num):
         try:
             self.browser.get('''http://www.baidu.com''')
             sleep(1)
             self.update_db_log()
             self.success_add()
-            input_block = self.browser.find_element_by_xpath('''//*[@id="kw"]''')
+            input_block = self.browser.find_element_by_xpath(
+                '''//*[@id="kw"]''')
             self.input_mode.input(input_block, keyword, "kw")
             input_block.send_keys(Keys.ENTER)
             sleep(2)
             if self.random_click_on_page(num):
-                for i in range(random.randint(1,3)):
+                for i in range(random.randint(1, 3)):
                     self.go_to_next_page(num)
                     self.random_click_on_page(num)
                 return True
             else:
                 return False
-        except Exception,e:
+        except Exception, e:
             self.logger.error(e)
             return False
 
     #中国搜索
-    def china_search(self,keyword,num):
+    def china_search(self, keyword, num):
         try:
             self.browser.get('''http://www.chinaso.com/''')
             sleep(1)
             self.update_db_log()
             self.success_add()
-            input_block = self.browser.find_element_by_xpath('''//*[@id="q"]''')
+            input_block = self.browser.find_element_by_xpath(
+                '''//*[@id="q"]''')
             self.input_mode.input(input_block, keyword, "q")
             input_block.send_keys(Keys.ENTER)
             if self.random_click_on_page(num):
-                for i in range(random.randint(1,3)):
+                for i in range(random.randint(1, 3)):
                     self.go_to_next_page(num)
                     self.random_click_on_page(num)
                 return True
             else:
                 return False
-        except Exception,e:
+        except Exception, e:
             self.logger.error(e)
             return False
 
@@ -234,7 +261,8 @@ class ChinaUSearch(prototype):
             sleep(1)
             self.update_db_log()
             self.success_add()
-            input_block = self.browser.find_element_by_xpath('''//*[@id="sb_form_q"]''')
+            input_block = self.browser.find_element_by_xpath(
+                '''//*[@id="sb_form_q"]''')
             self.input_mode.input(input_block, keyword, "sb_form_q")
             input_block.send_keys(Keys.ENTER)
             if self.random_click_on_page(num):
@@ -255,7 +283,8 @@ class ChinaUSearch(prototype):
             sleep(1)
             self.update_db_log()
             self.success_add()
-            input_block = self.browser.find_element_by_xpath('''//*[@id="uh-search-box"]''')
+            input_block = self.browser.find_element_by_xpath(
+                '''//*[@id="uh-search-box"]''')
             self.input_mode.input(input_block, keyword, "uh-search-box")
             input_block.send_keys(Keys.ENTER)
             if self.random_click_on_page(num):
@@ -278,7 +307,7 @@ class ChinaUSearch(prototype):
             self.success_add()
             sleep(5)
             if self.random_click_on_page(num):
-                for i in range(random.randint(1,3)):
+                for i in range(random.randint(1, 3)):
                     self.go_to_next_page(num)
                     self.random_click_on_page(num)
                 return True
@@ -330,7 +359,8 @@ class ChinaUSearch(prototype):
         # 这里的方法是，把页面高度分为60段，每秒从每段距离里随机移动距离，直到这段距离完成后进行下一段的移动，可变
         try:
             # self.switch_to_new_windows()
-            pageheight = self.browser.execute_script('''return document.body.scrollHeight''')
+            pageheight = self.browser.execute_script(
+                '''return document.body.scrollHeight''')
             moveh = 0
             nowh = 0
             for j in range(60):
@@ -346,7 +376,8 @@ class ChinaUSearch(prototype):
                     ymove = ymove - ranmove
                     if ymove <= 0:
                         ymove = 0
-                    js = "var q=document.documentElement.scrollTop={ran}".format(ran=nowh)
+                    js = "var q=document.documentElement.scrollTop={ran}".format(
+                        ran=nowh)
                     self.browser.execute_script(js)
                     s = i * 0.001
                     sleep(s)
@@ -361,7 +392,8 @@ class ChinaUSearch(prototype):
         try:
             self.switch_to_new_windows()
             print(u'zdyx查找元素:{0}'.format(select))
-            ele = WebDriverWait(self.browser, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, select)))
+            ele = WebDriverWait(self.browser, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, select)))
             # ele.send_keys(Keys.ENTER)
             # self.browser.find_element_by_xpath(select)#.send_keys(Keys.ENTER)
             sleep(1)
@@ -371,7 +403,8 @@ class ChinaUSearch(prototype):
             print(u"找不到目标:{0}".format(select))
             return -1
 
-    def baiduSearchsod(self, select, target, lj1, lj2, x1, y1):  # 0鼠标移动点击(查找两个元素)
+    def baiduSearchsod(self, select, target, lj1, lj2, x1,
+                       y1):  # 0鼠标移动点击(查找两个元素)
         try:
             titles = WebDriverWait(self.browser, 10).until(
                 EC.presence_of_all_elements_located((By.CSS_SELECTOR, select)))
@@ -384,7 +417,8 @@ class ChinaUSearch(prototype):
                     self.process_dj(t)  # 直接点击(无操作鼠标)
                 if lj1 != "":
                     self.process_ljd(t)  # 找到链接(针对58显示)
-                    self.go_to_next_page12(target, lj1, lj2, x1, y1)  # 移动点击(操作鼠标)
+                    self.go_to_next_page12(target, lj1, lj2, x1,
+                                           y1)  # 移动点击(操作鼠标)
                     self.switch_to_new_windows()  # 绑定窗口
                 return 0
 
@@ -395,7 +429,8 @@ class ChinaUSearch(prototype):
             # self.switch_to_new_windows()
             if iframeselect != "":
                 ifr = WebDriverWait(self.browser, 10).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, iframeselect)))
+                    EC.presence_of_element_located((By.CSS_SELECTOR,
+                                                    iframeselect)))
                 self.browser.switch_to_frame(ifr)
             print(self.browser.title)
             news_as = WebDriverWait(self.browser, 10).until(
@@ -408,7 +443,8 @@ class ChinaUSearch(prototype):
 
             if div != "":
                 self.detialpage_div = WebDriverWait(self.browser, 10).until(
-                    EC.presence_of_all_elements_located((By.CSS_SELECTOR, div)))
+                    EC.presence_of_all_elements_located((By.CSS_SELECTOR,
+                                                         div)))
             self.browser.switch_to.default_content()
             print(u'取得详细面URL成功')
             return 0
@@ -429,10 +465,12 @@ class ChinaUSearch(prototype):
             print(openurl)
             try:
                 with self.wait_for_new_window(self.browser):
-                    self.browser.execute_script("window.open('{0}')".format(openurl))
+                    self.browser.execute_script(
+                        "window.open('{0}')".format(openurl))
 
             except Exception, e:
-                openurl = random.choice(self.detialpage_div)  # 有URL就点URL，没有就点DIV
+                openurl = random.choice(
+                    self.detialpage_div)  # 有URL就点URL，没有就点DIV
                 self.click_mode.signal_pausing()
                 openurl.click()
                 print('click')
@@ -462,7 +500,7 @@ class ChinaUSearch(prototype):
                 index -= 1
                 continue
             if url != "":
-                break;
+                break
             index -= 1
         sleep(3)
 
@@ -478,33 +516,36 @@ class ChinaUSearch(prototype):
         print(u'E')
         #title.send_keys(Keys.END)
         sleep(2)
-        title.send_keys(Keys.CONTROL+'c')
+        title.send_keys(Keys.CONTROL + 'c')
         print(u'找到链接')
         sleep(3)
 #----------------------------------------------------------------
-    def GoToIndexPage(self,url):    #0新键标签页输入网址
+
+    def GoToIndexPage(self, url):  #0新键标签页输入网址
         print(u"打开首页")
         try:
-            print (url)
+            print(url)
             self.browser.execute_script("window.open('{0}')".format(url))
             self.switch_to_new_windows()
-            print(u"打开网页成功"+url)
+            print(u"打开网页成功" + url)
             return 0
         except Exception, e:
             strerr = str(e)
             if strerr.find('Timed out waiting for page load') != -1:
                 print(u"打开网页成功" + url)
                 return 0
-            print(u'打开首页错误:'+str(e))
+            print(u'打开首页错误:' + str(e))
             sleep(1)
             return -1
 
             # 1搜索内容u"com"  2目标标签"a"(填写""鼠标不移动直接打开)  3点击 pyautogui(填写""不点击)  4和5相对移动X轴Y轴(鼠标移动到目标后,填写""不移动)
 
-    def go_to_next_page12(self, target, lj1, lj2, x1, y1):  # 0移动鼠标点击    查找当前显示效果文字
+    def go_to_next_page12(self, target, lj1, lj2, x1,
+                          y1):  # 0移动鼠标点击    查找当前显示效果文字
         try:
             titles = WebDriverWait(self.browser, 10).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, lj1)))  # 查找当前显示效果文字
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR,
+                                                     lj1)))  # 查找当前显示效果文字
             for t in titles:
                 if t.text.find(target) != -1:
                     print("1")
@@ -517,7 +558,8 @@ class ChinaUSearch(prototype):
                     top += 95 + 5
                     left += 20 + 20
                     print(u"移动")
-                    pyautogui.moveTo(left, top, duration=3)  # 移动速度duration (多少秒)
+                    pyautogui.moveTo(
+                        left, top, duration=3)  # 移动速度duration (多少秒)
                     sleep(1)
                     if x1 != "":
                         pyautogui.moveRel(x1, y1, duration=2)  # 鼠标当前相对移动距离
@@ -532,7 +574,7 @@ class ChinaUSearch(prototype):
             print(u"移动错误")
             return -1
 
-    def DoPC(self,keyword):
+    def DoPC(self, keyword):
         ch = random.randint(1, 100)
         if ch > 100:  # 大于多少执行
             res = self.GoToIndexPage("http://www.baidu.com/")  # 打开网址
@@ -549,7 +591,9 @@ class ChinaUSearch(prototype):
                 ret = self.Process_360SearchPage()  # 滚轮
                 if ret != 0:
                     return False
-            ret = self.baiduSearchso1(6, "div.f13", u"www.58.com", "a", pyautogui, "", "", "a.n", u"下一页>")  # 鼠标移动点击网址
+            ret = self.baiduSearchso1(6, "div.f13", u"www.58.com", "a",
+                                      pyautogui, "", "", "a.n",
+                                      u"下一页>")  # 鼠标移动点击网址
             if ret != True:  # 1多少页  2链接属性（标题是h3 普通链接div.f13） 3目标链接标签名 4链接"a"标签代表点击打开（填写""代表直接打开链接）  5填写pyautogui就会点击，填写""就鼠标移动过去但不会点击
                 print(u"找不到")  # 最后两个为鼠标当前位置的X和Y轴
                 return False
@@ -568,27 +612,33 @@ class ChinaUSearch(prototype):
         ret = self.zdyx("div#header-home-title,a.entrance")
         if ret == 0:
             print(u"进入")
-            ret = self.baiduSearchsod("div#header-home-title,a.entrance", "", "div#header-home-title,a.entrance",
+            ret = self.baiduSearchsod("div#header-home-title,a.entrance", "",
+                                      "div#header-home-title,a.entrance",
                                       pyautogui, "", "")  # 鼠标移动点击网址
             if ret != 0:  # 1多少页  2链接属性（标题是h3 普通链接div.f13） 3目标链接标签名 4链接"a"标签代表点击打开（填写""代表直接打开链接）  5填写pyautogui就会点击，填写""就鼠标移动过去但不会点击
                 print(u"找不到")  # 最后两个为鼠标当前位置的X和Y轴
                 return False
             self.typd3(3, "div.bar_left")
 
-        ret = self.GetDetailUrl("",
-                                "div.fl.cbp1.cbhg>div.board:nth-child(1)>span>a,div.fl.cbp1.cbhg>div.board:nth-child(1)>a,div.fl.cbp2.cbhg>div.board:nth-child(1)>span>em>a,div.fl.cbp2.cbhg>div.board:nth-child(1)>span>a",
-                                "")  # 取得详细页URL 比如：第一个填的是可以点击的标签,第二个是div,如果第一个点不了就点击第二个
+        ret = self.GetDetailUrl(
+            "",
+            "div.fl.cbp1.cbhg>div.board:nth-child(1)>span>a,div.fl.cbp1.cbhg>div.board:nth-child(1)>a,div.fl.cbp2.cbhg>div.board:nth-child(1)>span>em>a,div.fl.cbp2.cbhg>div.board:nth-child(1)>span>a",
+            "")  # 取得详细页URL 比如：第一个填的是可以点击的标签,第二个是div,如果第一个点不了就点击第二个
         if ret != 0:  # 收集详细页
             return -1
         ret = self.OpenDetialPage()  # 随机打开一条详细页
         if ret != 0:
             return -1
 
-        self.typd3(3, "div.nav.float_l,div.nav,div.nav-top-bar.c_888.f12,div.site-nav.fl,div.crumbs_navigation")
+        self.typd3(
+            3,
+            "div.nav.float_l,div.nav,div.nav-top-bar.c_888.f12,div.site-nav.fl,div.crumbs_navigation"
+        )
 
-        ret = self.GetDetailUrl("",
-                                "div.tdiv>a,a.title.t,div.list-info.warehouse>h2>a,table.tbimg.kcc_tsys>tbody>tr>td:nth-child(2)>a.t,div.infocon>table>tbody>tr.zzinfo>td.t>a,div.list-info>h2>a,div.item-mod>div>a:nth-child(1),div.des>h2>a:nth-child(1)",
-                                "")  # 取得详细页URL 比如：第一个填的是可以点击的标签,第二个是div,如果第一个点不了就点击第二个
+        ret = self.GetDetailUrl(
+            "",
+            "div.tdiv>a,a.title.t,div.list-info.warehouse>h2>a,table.tbimg.kcc_tsys>tbody>tr>td:nth-child(2)>a.t,div.infocon>table>tbody>tr.zzinfo>td.t>a,div.list-info>h2>a,div.item-mod>div>a:nth-child(1),div.des>h2>a:nth-child(1)",
+            "")  # 取得详细页URL 比如：第一个填的是可以点击的标签,第二个是div,如果第一个点不了就点击第二个
         if ret != 0:  # 收集详细页
             return -1
         ret = self.OpenDetialPage()  # 随机打开一条详细页
@@ -600,29 +650,29 @@ class ChinaUSearch(prototype):
         sleep(5)
         return 0
 
-    def DoWAP(self,keyword):
+    def DoWAP(self, keyword):
         ret = self.GoTo58()
         if ret != 0:
             return -1
         ret = self.FindTitlePhone(keyword)
         if ret != 0:
             # 未能找到目标
-            if ret == -5:#搜索完成但没找到
+            if ret == -5:  #搜索完成但没找到
                 #self.ReportNotFound()
                 print(u"搜索完成但没找到对应关键字")
                 return 0
-            return -1 #搜索一半出错
+            return -1  #搜索一半出错
         else:
             #self.Report()
             print(u"搜索完成")
             return 0
 
-    def search_58(self,keyword,num):
+    def search_58(self, keyword, num):
         self.update_db_log()
         self.success_add()
-        if self.terminal_type == 2:#wap
+        if self.terminal_type == 2:  #wap
             res = self.DoWAP(keyword)
-        elif self.terminal_type == 1:#pc
+        elif self.terminal_type == 1:  #pc
             res = self.DoPC(keyword)
 
         if res == 0:
@@ -632,7 +682,8 @@ class ChinaUSearch(prototype):
 
 
 #----------------------------------------------------------
-    # gcn.6a.com搜索
+# gcn.6a.com搜索
+
     def gcn_search(self):
         try:
             self.browser.get('''http://www.baidu.com/''')
@@ -644,9 +695,7 @@ class ChinaUSearch(prototype):
             self.logger.error(e)
             return False
 
-
-
-    def go_to_next_page(self,num):
+    def go_to_next_page(self, num):
         try:
             sleep(3)
             if num == 0:
@@ -655,7 +704,7 @@ class ChinaUSearch(prototype):
                     if a.text == u"下一页>":
                         anext = a
             elif num == 1:
-                anext = self.script.find_elem("id","snext")
+                anext = self.script.find_elem("id", "snext")
             elif num == 2:
                 anext = self.script.find_elem("id", "sogou_next")
             elif num == 3:
@@ -669,10 +718,10 @@ class ChinaUSearch(prototype):
                 anext = self.script.find_elem("css", "a.next")
             if anext != None:
                 if num == 5:
-                    self.move_to_next_btn(anext,95)
+                    self.move_to_next_btn(anext, 95)
                 else:
                     self.move_to_next_btn(anext)
-                self.browser.execute_script("arguments[0].click()", anext);
+                self.browser.execute_script("arguments[0].click()", anext)
                 sleep(3)
                 return True
             else:
@@ -680,9 +729,9 @@ class ChinaUSearch(prototype):
         except Exception, e:
             return False
 
-
-    def move_to_next_btn(self,ele,step=110):
-        availHeight = self.browser.execute_script("return window.document.documentElement.clientHeight;")
+    def move_to_next_btn(self, ele, step=110):
+        availHeight = self.browser.execute_script(
+            "return window.document.documentElement.clientHeight;")
         top = self.browser.execute_script(
             '''function getElementViewTop(element){var actualTop=element.offsetTop;var current=element.offsetParent;while(current!==null){actualTop+=current.offsetTop;current=current.offsetParent}if(document.compatMode=="BackCompat"){var elementScrollTop=document.body.scrollTop}else{var elementScrollTop=document.documentElement.scrollTop}return actualTop-elementScrollTop};return getElementViewTop(arguments[0])''',
             ele)
@@ -702,19 +751,20 @@ class ChinaUSearch(prototype):
         pyautogui.click()
         sleep(3)
 
-
-    def process_block(self, title,topstep=110):
-        availHeight = self.browser.execute_script("return window.document.documentElement.clientHeight;")
+    def process_block(self, title, topstep=110):
+        availHeight = self.browser.execute_script(
+            "return window.document.documentElement.clientHeight;")
         top = self.browser.execute_script(
             '''function getElementViewTop(element){var actualTop=element.offsetTop;var current=element.offsetParent;while(current!==null){actualTop+=current.offsetTop;current=current.offsetParent}if(document.compatMode=="BackCompat"){var elementScrollTop=document.body.scrollTop}else{var elementScrollTop=document.documentElement.scrollTop}return actualTop-elementScrollTop};return getElementViewTop(arguments[0])''',
             title)
         if top > availHeight:
-            self.browser.execute_script("return arguments[0].scrollIntoView();", title)
+            self.browser.execute_script(
+                "return arguments[0].scrollIntoView();", title)
             self.browser.execute_script("window.scrollBy(0, -200);")
         drawSquare()
         try:
             a_tag = title.find_element_by_css_selector("a:first-child")
-        except Exception,e:
+        except Exception, e:
             a_tag = title
         print a_tag.get_attribute("href")
         left = self.browser.execute_script(
@@ -733,13 +783,12 @@ class ChinaUSearch(prototype):
         pyautogui.click()
         pyautogui.keyUp('ctrl')
 
-
     #在页面上随机点击
-    def random_click_on_page(self,num):
+    def random_click_on_page(self, num):
         try:
             nowhandle = self.browser.current_window_handle
             newsres = []
-            titleflag ="h3"
+            titleflag = "h3"
             if num == 0:
                 elems = self.script.find_element_css_list("div.c-container")
             elif num == 1:
@@ -753,7 +802,8 @@ class ChinaUSearch(prototype):
                 elems = self.script.find_element_css_list("li.b_algo")
                 titleflag = "h2"
             elif num == 5:
-                elems = self.script.find_element_css_list("div.dd.algo.algo-sr")
+                elems = self.script.find_element_css_list(
+                    "div.dd.algo.algo-sr")
             elif num == 6:
                 elems = self.script.find_element_css_list("div.pro")
                 titleflag = "span"
@@ -771,8 +821,8 @@ class ChinaUSearch(prototype):
                     ranres = random.sample(newsres, 1)
                     for ran in ranres:
                         sleep(3)
-                        if num == 4 or num==6:
-                            self.process_block(ran,120)
+                        if num == 4 or num == 6:
+                            self.process_block(ran, 120)
                         else:
                             self.process_block(ran)
                         sleep(5)
@@ -791,18 +841,21 @@ class ChinaUSearch(prototype):
             '''let currProfD = Services.dirsvc.get("ProfD", Ci.nsIFile);
                let profileDir = currProfD.path;
                return profileDir
-            '''
-        )
+            ''')
         cookietmp = os.path.join(profiletmp, cookie_name)
+        origin_cookie = os.path.join(home_dir, "profile")
+        origin_cookie = os.path.join(origin_cookie, str(self.profile_id))
+        origin_cookie = os.path.join(origin_cookie, cookie_name)
+        print "cookiename:", origin_cookie
         if self.copy_cookie == 1:
             if sys.platform == 'win32':
                 if os.system("XCOPY /E /Y /C " + profiletmp + "\*.* " +
                              self.origin_profile):
                     print "files should be copied :/"
             else:
-                cmd = "cp " + cookietmp + " "+ self.origin_cookie
-                print ("cmd:",cmd)
-                if os.system("cp " + cookietmp + " "+ self.origin_cookie):
+                cmd = "cp " + cookietmp + " " + origin_cookie
+                print("cmd:", cmd)
+                if os.system(cmd):
                     print "files should be copied :/"
         sleep(3)
         self.browser.quit()
@@ -818,28 +871,29 @@ def init():
     (options, args) = parser.parse_args()
     taskid = options.taskid
     if isdebug == True:
-        taskid = 3968251#3896222
-    myprint.print_green_text(u"程序初始化完成, 获取到任务id:{id}".format(id = options.taskid))
+        taskid = 3968251  #3896222
+    myprint.print_green_text(
+        u"程序初始化完成, 获取到任务id:{id}".format(id=options.taskid))
 
 
 def configdb(dbname):
     logging.config.fileConfig("{0}/log_conf/task.log.conf".format(workpath))
     logger = logging.getLogger()
     cf = ConfigParser.ConfigParser()
-    confpath="{0}/log_conf/db.conf".format(workpath)
+    confpath = "{0}/log_conf/db.conf".format(workpath)
     cf.read(confpath)
-    db_host = cf.get(dbname,"db_host")
-    db_name = cf.get(dbname,"db_name")
-    db_user = cf.get(dbname,"db_user")
-    db_pwd = cf.get(dbname,"db_pwd")
-    db_charset = cf.get(dbname,"db_charset")
-    db=DBUtil(logger,db_host,3306,db_name,db_user,db_pwd,db_charset)
+    db_host = cf.get(dbname, "db_host")
+    db_name = cf.get(dbname, "db_name")
+    db_user = cf.get(dbname, "db_user")
+    db_pwd = cf.get(dbname, "db_pwd")
+    db_charset = cf.get(dbname, "db_charset")
+    db = DBUtil(logger, db_host, 3306, db_name, db_user, db_pwd, db_charset)
     global profile_dir, home_dir, extension_name, cookie_name
-    profile_dir    = cf.get('ENV', "profile_dir")
-    home_dir       = cf.get('ENV', "home_dir")
+    profile_dir = cf.get('ENV', "profile_dir")
+    home_dir = cf.get('ENV', "home_dir")
     extension_name = cf.get('ENV', "extension_name")
-    cookie_name    = cf.get('ENV', "cookie_name")
-    return db,logger
+    cookie_name = cf.get('ENV', "cookie_name")
+    return db, logger
 
 
 def get_ip():  # 取得当前IP地址
@@ -849,22 +903,23 @@ def get_ip():  # 取得当前IP地址
     return re.search('\d+\.\d+\.\d+\.\d+', response).group(0)
 
 
-def write_ip_to_vm_cur_task(db,taskid):  # 写入到vm_cur_task里
+def write_ip_to_vm_cur_task(db, taskid):  # 写入到vm_cur_task里
     #ip = get_ip()
     ip = '127.0.0.1'
-    sql = "update vm_cur_task set ip='{0}' where id={1}".format(ip,taskid)
+    sql = "update vm_cur_task set ip='{0}' where id={1}".format(ip, taskid)
     ret = db.execute_sql(sql)
     if ret < 0:
         print(u"写入运行时IP出错")
         return -1
     return 0
 
+
 def run():
     q = Queue.Queue()
     myprint.print_green_text(u"获取任务中")
-    db,logger =  configdb("DB_vm")
+    db, logger = configdb("DB_vm")
 
-    write_ip_to_vm_cur_task(db,taskid) #写入运行时IP到vm_cur_task表
+    write_ip_to_vm_cur_task(db, taskid)  #写入运行时IP到vm_cur_task表
 
     # for i in range(1, 4):
     #     sql = """select keyword from keyword_lib order by rand() limit 1""".format(taskid)
@@ -895,13 +950,14 @@ def run():
     #             myprint.print_red_text(u"引擎:搜索失败")
     #             logger.error(e)
 
-    sql = """select keyword from keyword_lib order by rand() limit 1""".format(taskid)
+    sql = """select keyword from keyword_lib order by rand() limit 1""".format(
+        taskid)
     ret = db.select_sql(sql, 'DictCursor')
     if ret:
         keyword = ret[0]['keyword'].decode("utf8")
         pids = psutil.pids()
         # try:
-        engine = ChinaUSearch(logger, db, taskid, q ,pids)
+        engine = ChinaUSearch(logger, db, taskid, q, pids)
         usertype = engine.user_type
         print(u"user_type:{0}".format(usertype))
         if usertype == 0:
@@ -919,7 +975,7 @@ def run():
         elif usertype == 6:
             flag = engine.sooxie_search(keyword, usertype)
         elif usertype == 7:
-            flag = engine.search_58(keyword,usertype)
+            flag = engine.search_58(keyword, usertype)
 
         if flag:
             sleep(10)
@@ -930,7 +986,7 @@ def run():
             myprint.print_red_text(u"引擎:搜索失败")
             engine.task_failed()
             return
-        myprint.print_green_text(u"引擎:进入待机:%d s"%(engine.standby_time*60))
+        myprint.print_green_text(u"引擎:进入待机:%d s" % (engine.standby_time * 60))
         sleep(engine.standby_time * 60)
         myprint.print_green_text(u"引擎:待机完成")
         engine.task_wait_finished()
@@ -952,39 +1008,13 @@ def main():
     else:
         isdebug = False
 
-    init() #配置任务
-    try:
+    init()  #配置任务
+    # try:
+    if True:
         run()  #执行任务
-    except Exception,e:
-        myprint.print_red_text(u"引擎:执行任务失败{0}".format(e))
+    # except Exception,e:
+    #     myprint.print_red_text(u"引擎:执行任务失败{0}".format(e))
 
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

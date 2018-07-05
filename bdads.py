@@ -342,7 +342,7 @@ class ChinaUSearch(prototype):
             sleep(2)
             input_block.send_keys(Keys.ENTER)
         except Exception, e:
-            myprint.print_red_text(u"搜索失败:{0}".format(str(e)))
+            myprint.print_red_text(u"baidu_search_phone错误:{0}".format(str(e)))
 
 
     def satisfy_condition(self, block):
@@ -517,8 +517,10 @@ class ChinaUSearch(prototype):
                 title)
             #用script首页后,之后继续打开可能会出现窗口数更之前一样,导致wait超时
             self.click_mode.signal_pausing()
-            w_a = random.randint(0,w)
-            h_a = random.randint(2,h-2)
+            print(w)
+            print(h)
+            w_a = random.randint(1,int(w))
+            h_a = random.randint(2,int(h-2))
             print("top:{0} left:{1} w:{2} h:{3} h_a:{4} w_a:{5}".format(top,left,w,h,h_a,w_a))
             self.click_mode.click(top+h_a+offtop, left+w_a, a_tag,g_step-10, self.cm)
             sleep(3)
@@ -668,7 +670,7 @@ class ChinaUSearch(prototype):
             selector = "a"
             sleep(5)
             self.switch_to_new_windows()
-            a_tags = self.element_all(By.TAG_NAME, selector)
+            #a_tags = self.element_all(By.TAG_NAME, selector)
             cur_url = self.browser.current_url
             myprint.print_blue_text(u"当前打开的目标网址为:{0}".format( cur_url) )
 
@@ -718,7 +720,7 @@ class ChinaUSearch(prototype):
                     if rt == 0:
                         rt = self.is_url_ok()
                         if rt == 0:
-                            return 0
+                            return 1
                         else:
                             return 3
                     else:
@@ -898,29 +900,29 @@ class ChinaUSearch(prototype):
         try:
             selector = "a"
             self.switch_to_new_windows()
-            a_tags = self.element_all(By.TAG_NAME, selector)
-            randa = random.choice(a_tags)
-            index = 0
-            while not randa.is_displayed():
-                print(u"not randa.is_displayed {0}".format(index))
-                index += 1
-                sleep(1)
-                if index > 20:
-                    break
-            if randa.is_displayed():
-                print(u"---》开始截图《---")
-                localfile = "D:\\{0}.jpg".format(self.rid)
-                # localfile = "d:\\task.jpg"
-                print localfile
-                ss = ScreenShot(localfile)
-                ss.take()
-                print "taked"
-                ftp = PicFTP('192.168.1.53', 21, 'uppic', '123456',
-                            self.logger, self.server_id, self.vm_id)
-                ftp.login()
-                ftp.upload_task_file(self.task_id, self.rid, localfile)
-                os.remove(localfile)
-                print(u"截图成功")
+            sleep(10)
+         #   randa = random.choice(a_tags)
+         #   index = 0
+         #   while not randa.is_displayed():
+         #       print(u"not randa.is_displayed {0}".format(index))
+         #       index += 1
+         #       sleep(1)
+         #       if index > 20:
+         #           break
+         #   if randa.is_displayed():
+            print(u"---》开始截图《---")
+            localfile = "D:\\{0}.jpg".format(self.rid)
+            # localfile = "d:\\task.jpg"
+            print localfile
+            ss = ScreenShot(localfile)
+            ss.take()
+            print "taked"
+            ftp = PicFTP('192.168.1.53', 21, 'uppic', '123456',
+                        self.logger, self.server_id, self.vm_id)
+            ftp.login()
+            ftp.upload_task_file(self.task_id, self.rid, localfile)
+            os.remove(localfile)
+            print(u"截图成功")
 
         except Exception, e:
             print(u"截图出错" + str(e))
@@ -1132,18 +1134,25 @@ class ChinaUSearch(prototype):
                 continue
         self.browser.quit()
         sleep(6)
-        os.system("rd /q /s "+profiletmp)
+        if profiletmp is not None:
+        	shutil.rmtree(profiletmp, True)
+            
 
-def get_ip():  # 取得当前IP地址
-    url = "http://packs.6a.com/site/clientip"
-    request = urllib2.urlopen(url)
-    response = request.read()
-    return re.search('\d+\.\d+\.\d+\.\d+', response).group(0)
+def get_ip(db, serverid):  # 取得当前IP地址
+    sql = "select ip from vpn_status where serverid={0}".format(serverid)
+    print(sql)
+    res = db.select_sql(sql, 'DictCursor')
+    if res == None:
+        return ""
+    else:
+        return res[0]["ip"]
 
 
-def write_ip_to_vm_cur_task(db,taskid):  # 写入到vm_cur_task里
-    ip = get_ip()
+def write_ip_to_vm_cur_task(db,taskid, serverid):  # 写入到vm_cur_task里
+    ip = get_ip(db, serverid)
+    #ip='127.0.0.1'
     sql = "update vm_cur_task set ip='{0}' where id={1}".format(ip,taskid)
+    print(sql)
     ret = db.execute_sql(sql)
     if ret < 0:
         print(u"写入运行时IP出错")
@@ -1196,7 +1205,7 @@ def get_task(db, id):
     return res
 
 def init():
-    myprint.print_green_text(u"bdads.py 2018/05/31 程序初始化中..")
+    myprint.print_green_text(u"bdads.py 2018/06/09 程序初始化中..")
     global taskid, is_debug_mode
     parser = optparse.OptionParser()
     parser.add_option("-t", "--task_id", dest="taskid")
@@ -1241,7 +1250,7 @@ def main():
         # if True:
         res = get_task(db, taskid)
         if res != None:
-            write_ip_to_vm_cur_task(db, taskid)#写入IP
+            write_ip_to_vm_cur_task(db, taskid,res[0]["server_id"])#写入IP res[0]["server_id"]
             for t in res:
                 c_rate = t['click_rate']
                 cr = ClickRate(c_rate)

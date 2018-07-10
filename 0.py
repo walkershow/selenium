@@ -2,38 +2,38 @@
 # -*- coding: utf-8 -*-
 # File              : 0.py
 # Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 10.07.2018 10:52:1531191127
+# Last Modified Date: 10.07.2018 10:52:1531191127
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 10.07.2018 10:49:1531190959
+# Last Modified Date: 10.07.2018 10:49:1531190959
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 10.07.2018 10:47:1531190835
+# Last Modified Date: 10.07.2018 10:47:1531190835
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 10.07.2018 10:45:1531190727
+# Last Modified Date: 10.07.2018 10:45:1531190727
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 10.07.2018 09:21:1531185713
+# Last Modified Date: 10.07.2018 10:38:1531190286
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0.py
+# Author            : coldplay <coldplay_gz@sina.cn>
 # Date              : 27.06.2018 11:07:1530068870
 # Last Modified Date: 27.06.2018 11:07:1530068870
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 27.06.2018 11:07:1530068862
-# Last Modified Date: 27.06.2018 11:07:1530068862
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 27.06.2018 11:03:1530068637
-# Last Modified Date: 27.06.2018 11:03:1530068637
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 27.06.2018 10:45:1530067522
-# Last Modified Date: 27.06.2018 10:45:1530067522
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 27.06.2018 10:45:1530067510
-# Last Modified Date: 27.06.2018 10:45:1530067510
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 14.06.2018 10:49:1528944558
-# Last Modified Date: 27.06.2018 10:42:1530067343
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
 from contextlib import contextmanager
 from selenium import webdriver
@@ -79,7 +79,7 @@ profile_dir = None
 home_dir = None
 extension_name = None
 cookie_name = None
-
+g_step = 150
 isdebug = False
 
 
@@ -775,6 +775,7 @@ class ChinaUSearch(prototype):
             title)
         # 修正位置
         top += topstep
+        print 'top,topstep:', top, topstep
         left += 30
         ran = random.randint(3, 7)
         pyautogui.moveTo(left, top, duration=ran)
@@ -822,9 +823,9 @@ class ChinaUSearch(prototype):
                     for ran in ranres:
                         sleep(3)
                         if num == 4 or num == 6:
-                            self.process_block(ran, 120)
+                            self.process_block(ran, g_step+10)
                         else:
-                            self.process_block(ran)
+                            self.process_block(ran, g_step)
                         sleep(5)
                         self.browser.switch_to.window(nowhandle)
             return True
@@ -888,11 +889,13 @@ def configdb(dbname):
     db_pwd = cf.get(dbname, "db_pwd")
     db_charset = cf.get(dbname, "db_charset")
     db = DBUtil(logger, db_host, 3306, db_name, db_user, db_pwd, db_charset)
-    global profile_dir, home_dir, extension_name, cookie_name
+    global profile_dir, home_dir, extension_name, cookie_name,g_step
     profile_dir = cf.get('ENV', "profile_dir")
     home_dir = cf.get('ENV', "home_dir")
     extension_name = cf.get('ENV', "extension_name")
     cookie_name = cf.get('ENV', "cookie_name")
+    g_step = int( cf.get('ENV', "step") )
+    print profile_dir, home_dir, extension_name, cookie_name, g_step
     return db, logger
 
 

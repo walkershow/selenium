@@ -2,6 +2,36 @@
 # -*- coding: utf-8 -*-
 # File              : 0p.py
 # Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 10.07.2018 10:54:1531191274
+# Last Modified Date: 10.07.2018 10:54:1531191274
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0p.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 10.07.2018 10:20:1531189205
+# Last Modified Date: 10.07.2018 10:29:1531189784
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0p.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 10.07.2018 10:19:1531189172
+# Last Modified Date: 10.07.2018 10:19:1531189172
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0p.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 10.07.2018 09:49:1531187378
+# Last Modified Date: 10.07.2018 09:49:1531187378
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0p.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 10.07.2018 09:42:1531186922
+# Last Modified Date: 10.07.2018 09:42:1531186922
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : 0p.py
+# Author            : coldplay <coldplay_gz@sina.cn>
 # Date              : 14.06.2018 10:43:1528944185
 # Last Modified Date: 27.06.2018 11:28:1530070087
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
@@ -58,6 +88,7 @@ profile_dir = None
 home_dir = None
 extension_name = None
 cookie_name = None
+g_step = 150
 
 
 def drawSquare():
@@ -277,7 +308,7 @@ class ChinaUSearch(prototype):
                 anext = self.script.find_elem("css", "a.next")
             if anext != None:
 
-                self.move_to_next_btn(anext, 130)
+                self.move_to_next_btn(anext, g_step)
                 #   self.browser.execute_script("arguments[0].click()", anext);
                 sleep(3)
                 return True
@@ -331,8 +362,10 @@ class ChinaUSearch(prototype):
             title)
         # 修正位置
         top += topstep
+        print 'top, topstep', top, topstep
         left += 50
         ran = random.randint(3, 7)
+        print "move to:",top,left
         pyautogui.moveTo(left, top, duration=ran)
         pyautogui.keyDown('ctrl')
         pyautogui.click()
@@ -403,9 +436,9 @@ class ChinaUSearch(prototype):
                         sleep(2)
                         if self.user_type == 0:  #百度
                             print('4')
-                            self.process_block(ran, 130)
+                            self.process_block(ran, g_step)
                         else:
-                            self.process_block(ran, 150)
+                            self.process_block(ran, g_step+20)
                         sleep(5)
                         self.browser.switch_to.window(nowhandle)
             return True
@@ -465,11 +498,12 @@ def configdb(dbname):
     db_pwd = cf.get(dbname, "db_pwd")
     db_charset = cf.get(dbname, "db_charset")
     db = DBUtil(logger, db_host, 3306, db_name, db_user, db_pwd, db_charset)
-    global profile_dir, home_dir, extension_name, cookie_name
+    global profile_dir, home_dir, extension_name, cookie_name,g_step
     profile_dir = cf.get('ENV', "profile_dir")
     home_dir = cf.get('ENV', "home_dir")
     extension_name = cf.get('ENV', "extension_name")
     cookie_name = cf.get('ENV', "cookie_name")
+    g_step = int( cf.get('ENV', "step") )
     return db, logger
 
 

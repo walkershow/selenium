@@ -1,5 +1,23 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# File              : bdads.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 10.07.2018 14:34:1531204459
+# Last Modified Date: 10.07.2018 14:34:1531204459
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : bdads.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 10.07.2018 11:19:1531192793
+# Last Modified Date: 10.07.2018 11:19:1531192793
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : bdads.py
+# Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 10.07.2018 09:37:1531186666
+# Last Modified Date: 10.07.2018 11:04:1531191857
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
 # File              : bdadsy.py
 # Author            : coldplay <coldplay_gz@sina.cn>
 # Date              : 27.06.2018 11:28:1530070115
@@ -539,10 +557,12 @@ class ChinaUSearch(prototype):
             self.click_mode.signal_pausing()
             print(w)
             print(h)
-            w_a = random.randint(1,int(w))
-            h_a = random.randint(2,int(h-2))
-            print("top:{0} left:{1} w:{2} h:{3} h_a:{4} w_a:{5}".format(top,left,w,h,h_a,w_a))
-            self.click_mode.click(top+h_a+offtop, left+w_a, a_tag,g_step-10, self.cm)
+            w_a = random.randint(1, int(w))
+            h_a = random.randint(2, int(h - 2))
+            print("top:{0} left:{1} w:{2} h:{3} h_a:{4} w_a:{5}".format(
+                top, left, w, h, h_a, w_a))
+            self.click_mode.click(top + h_a + offtop, left + w_a, a_tag,
+                                  g_step - 10, self.cm)
             sleep(3)
             return 0
         except Exception, e:
@@ -550,7 +570,7 @@ class ChinaUSearch(prototype):
             sleep(5)
             return -1
 
-    def move_to_next_btn(self, ele, step=g_step, p_ctrl=False):
+    def move_to_next_btn(self, ele, step, p_ctrl=False):
         availHeight = self.browser.execute_script(
             "return window.document.documentElement.clientHeight;")
         top = self.browser.execute_script(
@@ -636,7 +656,7 @@ class ChinaUSearch(prototype):
                         self.go_to_page_bottom()  #一点点向下滚动到最下面
                         for a in a_list:
                             if a.text == u"下一页>":
-                                self.move_to_next_btn(a, 100)
+                                self.move_to_next_btn(a, g_step)
                                 return a
                     else:
                         print "jump in next page.."
@@ -650,7 +670,7 @@ class ChinaUSearch(prototype):
                         for a in divs:
                             print "link text:", a.text
                             if a.text == str(num):
-                                self.move_to_next_btn(a, 100)
+                                self.move_to_next_btn(a, g_step)
                                 return a  #True
                     sleep(3)
                     continue
@@ -921,15 +941,15 @@ class ChinaUSearch(prototype):
             selector = "a"
             self.switch_to_new_windows()
             sleep(10)
-         #   randa = random.choice(a_tags)
-         #   index = 0
-         #   while not randa.is_displayed():
-         #       print(u"not randa.is_displayed {0}".format(index))
-         #       index += 1
-         #       sleep(1)
-         #       if index > 20:
-         #           break
-         #   if randa.is_displayed():
+            #   randa = random.choice(a_tags)
+            #   index = 0
+            #   while not randa.is_displayed():
+            #       print(u"not randa.is_displayed {0}".format(index))
+            #       index += 1
+            #       sleep(1)
+            #       if index > 20:
+            #           break
+            #   if randa.is_displayed():
             print(u"---》开始截图《---")
             localfile = "D:\\{0}.jpg".format(self.rid)
             # localfile = "d:\\task.jpg"
@@ -937,8 +957,8 @@ class ChinaUSearch(prototype):
             ss = ScreenShot(localfile)
             ss.take()
             print "taked"
-            ftp = PicFTP('192.168.1.53', 21, 'uppic', '123456',
-                        self.logger, self.server_id, self.vm_id)
+            ftp = PicFTP('192.168.1.53', 21, 'uppic', '123456', self.logger,
+                         self.server_id, self.vm_id)
             ftp.login()
             ftp.upload_task_file(self.task_id, self.rid, localfile)
             os.remove(localfile)
@@ -1158,23 +1178,22 @@ class ChinaUSearch(prototype):
         self.browser.quit()
         sleep(6)
         if profiletmp is not None:
-        	shutil.rmtree(profiletmp, True)
-            
+            shutil.rmtree(profiletmp, True)
+
 
 def get_ip(db, serverid):  # 取得当前IP地址
     sql = "select ip from vpn_status where serverid={0}".format(serverid)
     print(sql)
     res = db.select_sql(sql, 'DictCursor')
-    if res == None:
+    if res is None:
         return ""
     else:
         return res[0]["ip"]
 
 
-def write_ip_to_vm_cur_task(db,taskid, serverid):  # 写入到vm_cur_task里
+def write_ip_to_vm_cur_task(db, taskid, serverid):  # 写入到vm_cur_task里
     ip = get_ip(db, serverid)
-    #ip='127.0.0.1'
-    sql = "update vm_cur_task set ip='{0}' where id={1}".format(ip,taskid)
+    sql = "update vm_cur_task set ip='{0}' where id={1}".format(ip, taskid)
     print(sql)
     ret = db.execute_sql(sql)
     if ret < 0:
@@ -1261,12 +1280,13 @@ def configdb(dbname):
     db_charset = cf.get(dbname, "db_charset")
     db = dbutil.DBUtil(logger, db_host, 3306, db_name, db_user, db_pwd,
                        db_charset)
-    global profile_dir, home_dir, extension_name, cookie_name
+    global profile_dir, home_dir, extension_name, cookie_name, g_step
     profile_dir = cf.get('ENV', "profile_dir")
     home_dir = cf.get('ENV', "home_dir")
     extension_name = cf.get('ENV', "extension_name")
     cookie_name = cf.get('ENV', "cookie_name")
-    print profile_dir, home_dir, extension_name, cookie_name
+    g_step = int(cf.get('ENV', "step"))
+    print profile_dir, home_dir, extension_name, cookie_name, g_step
     return db, logger
 
 
@@ -1280,7 +1300,8 @@ def main():
         # if True:
         res = get_task(db, taskid)
         if res != None:
-            write_ip_to_vm_cur_task(db, taskid,res[0]["server_id"])#写入IP res[0]["server_id"]
+            write_ip_to_vm_cur_task(
+                db, taskid, res[0]["server_id"])  #写入IP res[0]["server_id"]
             for t in res:
                 c_rate = t['click_rate']
                 cr = ClickRate(c_rate)
@@ -1301,25 +1322,10 @@ def main():
                 }
 
                 myprint.print_green_text(u'''
-
-
-
                     开始执行任务:
-
-
-
                     关键词:{keyword},
-
-
-
                     标题:{title},
-
-
-
                     链接:{url},
-
-
-
                     是否点击:{click_mode},
                     内页脚本:{script_name},
                     广告任务:{is_ad}'''.format(**format_data))

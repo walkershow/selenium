@@ -5,36 +5,6 @@
 # Date              : 10.07.2018 10:52:1531191127
 # Last Modified Date: 10.07.2018 10:52:1531191127
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 10.07.2018 10:49:1531190959
-# Last Modified Date: 10.07.2018 10:49:1531190959
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 10.07.2018 10:47:1531190835
-# Last Modified Date: 10.07.2018 10:47:1531190835
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 10.07.2018 10:45:1531190727
-# Last Modified Date: 10.07.2018 10:45:1531190727
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 10.07.2018 09:21:1531185713
-# Last Modified Date: 10.07.2018 10:38:1531190286
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 27.06.2018 11:07:1530068870
-# Last Modified Date: 27.06.2018 11:07:1530068870
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
 from contextlib import contextmanager
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -191,7 +161,6 @@ class ChinaUSearch(prototype):
         try:
             self.browser.get('''https://www.so.com''')
             sleep(1)
-            return True
             self.update_db_log()
             self.success_add()
             input_block = self.script.find_elem("id", "input")
@@ -555,7 +524,7 @@ class ChinaUSearch(prototype):
                     top = self.browser.execute_script(
                         '''function getElementViewTop(element){var actualTop=element.offsetTop;var current=element.offsetParent;while(current!==null){actualTop+=current.offsetTop;current=current.offsetParent}if(document.compatMode=="BackCompat"){var elementScrollTop=document.body.scrollTop}else{var elementScrollTop=document.documentElement.scrollTop}return actualTop-elementScrollTop};return getElementViewTop(arguments[0])''',
                         t)
-                    top += 95 + 5
+                    top += 135 + 5
                     left += 20 + 20
                     print(u"移动")
                     pyautogui.moveTo(
@@ -571,23 +540,22 @@ class ChinaUSearch(prototype):
                     return 0
         except Exception, e:
             print(str(e))
-            print(u"移动错误")
-            return -1
 
     def DoPC(self, keyword):
         ch = random.randint(1, 100)
         if ch > 100:  # 大于多少执行
-            res = self.GoToIndexPage("http://www.baidu.com/")  # 打开网址
-            if res != 0:
-                return False
-            sleep(5)
+            self.browser.get("http://www.baidu.com")
+            #res = self.GoToIndexPage("http://www.baidu.com/")  # 打开网址
+            #if res != 0:
+            #    return False
+            sleep(2)
             self.typd3(3, "input#kw")
             ret = self.sogotowz("input#kw", u"58同城", "input#su")  # 搜索百度
             if ret != 0:  # 1输入框2输入内容3搜索键
                 return False
-            sleep(5)
+            sleep(3)
             ch = random.randint(1, 100)
-            if ch > 100:  # 大于50执行
+            if ch > 50:  # 大于50执行
                 ret = self.Process_360SearchPage()  # 滚轮
                 if ret != 0:
                     return False
@@ -598,14 +566,15 @@ class ChinaUSearch(prototype):
                 print(u"找不到")  # 最后两个为鼠标当前位置的X和Y轴
                 return False
 
-            sleep(5)
+            sleep(3)
             self.typd3(3, "div.bar_left,div#header-home-title,a.entrance")
 
         else:
-            res = self.GoToIndexPage("http://www.58.com/")  # 打开网址
-            if res != 0:
-                return False
-            sleep(5)
+            self.browser.get("http://www.58.com")
+            #res = self.GoToIndexPage("http://www.58.com/")  # 打开网址
+            #if res != 0:
+            #    return False
+            sleep(2)
             self.typd3(3, "div.bar_left,div#header-home-title,a.entrance")
 
         print(u"判断")
@@ -718,7 +687,7 @@ class ChinaUSearch(prototype):
                 anext = self.script.find_elem("css", "a.next")
             if anext != None:
                 if num == 5:
-                    self.move_to_next_btn(anext, 95)
+                    self.move_to_next_btn(anext, 135)
                 else:
                     self.move_to_next_btn(anext)
                 self.browser.execute_script("arguments[0].click()", anext)
@@ -729,7 +698,7 @@ class ChinaUSearch(prototype):
         except Exception, e:
             return False
 
-    def move_to_next_btn(self, ele, step=110):
+    def move_to_next_btn(self, ele, step=150):
         availHeight = self.browser.execute_script(
             "return window.document.documentElement.clientHeight;")
         top = self.browser.execute_script(

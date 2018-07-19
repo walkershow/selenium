@@ -2,33 +2,16 @@
 # -*- coding: utf-8 -*-
 # File              : bdads.py
 # Author            : coldplay <coldplay_gz@sina.cn>
+# Date              : 19.07.2018 14:57:1531983470
+# Last Modified Date: 19.07.2018 14:59:1531983596
+# Last Modified By  : coldplay <coldplay_gz@sina.cn>
+# -*- coding: utf-8 -*-
+# File              : bdads.py
+# Author            : coldplay <coldplay_gz@sina.cn>
 # Date              : 10.07.2018 14:34:1531204459
 # Last Modified Date: 10.07.2018 14:34:1531204459
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
 # -*- coding: utf-8 -*-
-# File              : bdads.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 10.07.2018 11:19:1531192793
-# Last Modified Date: 10.07.2018 11:19:1531192793
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : bdads.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 10.07.2018 09:37:1531186666
-# Last Modified Date: 10.07.2018 11:04:1531191857
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : bdadsy.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 27.06.2018 11:28:1530070115
-# Last Modified Date: 05.07.2018 15:13:1530774802
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : bdads.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 14.06.2018 10:42:1528944136
-# Last Modified Date: 14.06.2018 10:42:1528944136
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
 import ConfigParser
 import importlib
 import logging
@@ -88,6 +71,10 @@ home_dir = None
 extension_name = None
 cookie_name = None
 g_step = 150
+ip = None
+username = None
+password = None
+port = 21
 
 
 class ele_not_clickable(object):
@@ -503,7 +490,7 @@ class ChinaUSearch(prototype):
             '''function getElementViewTop(element){var actualTop=element.offsetTop;var current=element.offsetParent;while(current!==null){actualTop+=current.offsetTop;current=current.offsetParent}if(document.compatMode=="BackCompat"){var elementScrollTop=document.body.scrollTop}else{var elementScrollTop=document.documentElement.scrollTop}return actualTop-elementScrollTop};return getElementViewTop(arguments[0])''',
             title)
         # 修正位置
-        top += 125
+        top += g_step + 15
         left += 40
         pyautogui.moveTo(left, top, duration=6)
         self.click_mode.signal_pausing()
@@ -558,7 +545,7 @@ class ChinaUSearch(prototype):
             print(w)
             print(h)
             w_a = random.randint(1, int(w))
-            h_a = random.randint(2, int(h - 2))
+            h_a = random.randint(4, int(h - 4))
             print("top:{0} left:{1} w:{2} h:{3} h_a:{4} w_a:{5}".format(
                 top, left, w, h, h_a, w_a))
             self.click_mode.click(top + h_a + offtop, left + w_a, a_tag,
@@ -684,7 +671,7 @@ class ChinaUSearch(prototype):
     def go_to_next_page_phone(self):
         #self.browser.execute_script("window.scrollTo(0,document.body.scrollHeight)")
         self.go_to_page_bottom()
-        sleep(4)
+        sleep(3)
         page_source = self.browser.page_source
         next_page_link = None
         if page_source.find("class=\"new-nextpage\"") != -1:
@@ -957,8 +944,10 @@ class ChinaUSearch(prototype):
             ss = ScreenShot(localfile)
             ss.take()
             print "taked"
-            ftp = PicFTP('192.168.1.53', 21, 'uppic', '123456', self.logger,
-                         self.server_id, self.vm_id)
+            # ftp = PicFTP('192.168.1.53', 21, 'uppic', '123456', self.logger,
+            #              self.server_id, self.vm_id)
+            frp = PicFtp(ip, port, username, password, self.logger,
+                    self.server_id, self.vm_id)
             ftp.login()
             ftp.upload_task_file(self.task_id, self.rid, localfile)
             os.remove(localfile)
@@ -1287,6 +1276,13 @@ def configdb(dbname):
     cookie_name = cf.get('ENV', "cookie_name")
     g_step = int(cf.get('ENV', "step"))
     print profile_dir, home_dir, extension_name, cookie_name, g_step
+    
+    confpath = "{0}/log_conf/ftp.conf".format(workpath)
+    cf.read(confpath)
+    ip = cf.get('FTP', "ip")
+    username = cf.get('FTP', "username")
+    password = cf.get('FTP', "password")
+    port = cf.get('FTP', "port")
     return db, logger
 
 

@@ -388,38 +388,40 @@ class ChinaUSearch(prototype):
             else:
                 return False
         elif self.method == "showurl":
-            try:
-                a_tag = block.find_element_by_css_selector(".c-showurl")
-                t = a_tag.text
-                if t.find(self.url) != -1:
-                    return True
-                else:
-                    return False
-            except Exception, e:
-                if self.is_ad == 0:
-                    return False
-                print u"########广告########"
-                a_tag = block.find_element_by_css_selector("a:first-child")
+            if self.is_ad == 0:#非广告
                 try:
-                    link = a_tag.get_attribute("data-landurl")
-                except Exception, e:
-                    return False
-                else:
-                    if link is not None:
-                        if link.find(self.url) != -1:
-                            return True
-                        else:
-                            return False
-                        print "###################"
-                    else:
-                        return False
-            else:
-                if a_tag is not None:
-                    print a_tag.text
-                    if a_tag.text.find(self.url) != -1:
+                    a_tag = block.find_element_by_css_selector(".c-showurl")
+                    t = a_tag.text
+                    if t.find(self.url) != -1:
                         return True
                     else:
                         return False
+                except Exception, e:
+                    print("1")
+                    return False
+            elif self.is_ad == 1:#广告
+                print u"########广告########"
+                try:
+                    print(u"查找广告")
+                    link = block.text
+                    print(link)
+                except Exception, e:
+                    print(u"找不到元素data-landurl"+str(e))
+                    return False
+
+                if link is not None:
+                    if link.find(self.url) != -1:
+                        return True
+                    else:
+                        return False
+
+        else:#非showurl等
+            if a_tag is not None:
+                print a_tag.text
+                if a_tag.text.find(self.url) != -1:
+                    return True
+                else:
+                    return False
 
     def satisfy_condition_phone(self, block):
         try:
@@ -518,15 +520,13 @@ class ChinaUSearch(prototype):
             # w, h =  GetTitleDimensions(a_tag.text)
             w = self.get_element_width(a_tag)
             h = self.get_element_height(a_tag)
-            availHeight = self.browser.execute_script(
-                "return window.document.documentElement.clientHeight;")
+            print("2")
             top = self.browser.execute_script(
                 '''function getElementViewTop(element){var actualTop=element.offsetTop;var current=element.offsetParent;while(current!==null){actualTop+=current.offsetTop;current=current.offsetParent}if(document.compatMode=="BackCompat"){var elementScrollTop=document.body.scrollTop}else{var elementScrollTop=document.documentElement.scrollTop}return actualTop-elementScrollTop};return getElementViewTop(arguments[0])''',
                 title)
             if top < 200:  #位置太高，有可能被挡到，#先滚到最顶部，再移动标题处，再向下滚200
                 self.browser.execute_script("window.scrollBy(0, 0);")
-                self.browser.execute_script(
-                    "return arguments[0].scrollIntoView();", title)
+                self.browser.execute_script("return arguments[0].scrollIntoView();", title)
                 self.browser.execute_script("window.scrollBy(0, -200);")
             #drawSquare()
             try:
@@ -688,19 +688,20 @@ class ChinaUSearch(prototype):
 
     def is_url_ok(self):  #判断是否打开的网页是正确的
         try:
-            if self.real_url == "":
+            print(u"对比目标网页")
+            if self.real_url == None or self.real_url == "":
                 myprint.print_green_text(u"real_url为空，无法判断目标是否正确")
                 return 0
             if self.method == "title":
                 myprint.print_green_text(u"搜索类型是‘标题’,无法判断目标URL")
                 return 0
-            selector = "a"
-            sleep(5)
-            self.switch_to_new_windows()
-            #a_tags = self.element_all(By.TAG_NAME, selector)
-            cur_url = self.browser.current_url
-            myprint.print_blue_text(u"当前打开的目标网址为:{0}".format(cur_url))
 
+            sleep(10)
+            self.switch_to_new_windows()
+            cur_url = self.browser.current_url
+            myprint.print_blue_text(u"目标网址:".format(self.real_url))
+            myprint.print_blue_text(u"当前打开的目标网址为:{0}".format( cur_url) )
+            sleep(5)
             if cur_url.find(self.real_url) != -1:
                 myprint.print_green_text(u"目标URL正确")
                 return 0
@@ -773,25 +774,58 @@ class ChinaUSearch(prototype):
                         if self.method == "showurl":
                             titles = []
                             adsdiv = []
-                            divs = self.element_all(By.CSS_SELECTOR,
-                                                    "div.c-container")
-                            stale = False
-                            for div in divs:
-                                # try:
-                                if True:
-                                    title = div.find_element_by_tag_name("h3")
-                                    if title is not None:
-                                        titles.append(title.text)
-                                        # print title.text
+                            # 一。取得div
+                            if self.is_ad == 0:#非广告
+                                divs = self.element_all(By.CSS_SELECTOR,
+                                                        "div.c-container")
+                            else:#广告
+                                try:
+                                    all_divs = self.element_all(By.CSS_SELECTOR,"div#content_left>div")#所有的，包含广告
+                                except Exception,e:
+                                    pass
+                                divs = []
+                                for div in all_divs:#删除非广告
+                                    try:
+                                        try:
+                                            div_class = div.get_attribute("class")
+                                            if div_class.find( "c-container") == -1:#c-container是非广告
+                                                divs.append(div)
+                                                continue
+                                        except Exception,e:
+                                            divs.append(div)
+                                    except Exception,e:
+                                        continue
 
-                            odivs = self.element_all(By.CSS_SELECTOR, "h3.t")
+                            stale = False
+                            # 二。取得链接内容
+                            if self.is_ad == 0:#非广告
+                                for div in divs:
+                                    # try:
+                                    if True:
+                                        title = div.find_element_by_tag_name("h3")
+                                        if title is not None:
+                                            titles.append(title.text)
+                                            # print title.text
+                                odivs = self.element_all(By.CSS_SELECTOR, "h3.t")
+                            else:#是广告
+                                odivs = []
+                                for div in divs:
+                                    try:
+                                        a_all = div.find_elements_by_css_selector("a>span")#中文链接广告
+                                        if len(a_all) > 0:
+                                            for a in a_all:
+                                                if a.text != "":
+                                                    odivs.append(a)
+                                    except Exception,e:
+                                        pass
+                            # 三。判断链接是否符合条件,符合的话就点击
                             for div in odivs:
                                 # print "div.txt",div.text
                                 if div.text not in titles:
                                     # print titles
                                     # print div.text
                                     if self.satisfy_condition(div):
-                                        rt = self.process_block(div)
+                                        rt = self.process_block(div,-10)
                                         if rt == 0:
                                             rt = self.is_url_ok()
                                             if rt == 0:

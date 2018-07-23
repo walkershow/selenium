@@ -63,4 +63,4 @@ else:
         return GetTextDimensions(text,12, "TrueType",1.3, 1.2 )
 
 # display_font("python代码:计算一个文本文件中所有大写字母,小写字母,..._百度知道","TrueType",12) 
-print(GetTextDimensions("python代码:计算一个文本文件中所有大写字母,小写字母,..._百度知道", 12, "TrueType"))
+#print(GetTextDimensions("python代码:计算一个文本文件中所有大写字母,小写字母,..._百度知道", 12, "TrueType"))

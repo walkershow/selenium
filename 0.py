@@ -495,8 +495,12 @@ class ChinaUSearch(prototype):
         try:
             print(url)
             self.browser.execute_script("window.open('{0}')".format(url))
+            sleep(3)
             self.switch_to_new_windows()
-            print(u"打开网页成功" + url)
+            divs = WebDriverWait(self.browser, 60).until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR,
+                                                     "div")))  # 等待网页打开
+            print(u"打开网页成功"+url)
             return 0
         except Exception, e:
             strerr = str(e)
@@ -758,40 +762,58 @@ class ChinaUSearch(prototype):
         try:
             nowhandle = self.browser.current_window_handle
             newsres = []
-            titleflag = "h3"
+            elems = []#存放所有标题a标签
+            telems = []#存放左边大标题
+            helems = []#存放右边热点标题
+            titleflag ="h3"
             if num == 0:
-                elems = self.script.find_element_css_list("div.c-container")
+                telems = self.browser.find_elements_by_css_selector("div.c-container>h3>a")#左标大标题
+                try:#有可能没热点
+                    helems = self.browser.find_elements_by_css_selector("table.c-table.opr-toplist-table>tbody>tr>td>span>a")#右边热点标题
+                except Exception,e:
+                    pass
             elif num == 1:
-                elems = self.script.find_element_css_list("li.res-list")
+                telems = self.browser.find_elements_by_css_selector("li.res-list>h3>a")  # 左标大标题
+                try:  # 有可能没热点
+                    helems = self.browser.find_elements_by_css_selector("ul.mh-wrap.js-mh-wrap.mh-active>li.mh-item>ul.mh-col>li.g-ellipsis>a")  # 右边热点标题
+                except Exception,e:
+                    pass
             elif num == 2:
-                elems = self.script.find_element_css_list("div.vrwrap,div.rb")
+                telems = self.browser.find_elements_by_css_selector("div.vrwrap>h3>a")  # 左标大标题
+                try:  # 有可能没热点
+                    helems = self.browser.find_elements_by_css_selector("ol.news-recommend>li>a")  # 右边热点标题
+                except Exception,e:
+                    pass
             elif num == 3:
-                elems = self.script.find_element_css_list("li.reItem")
-                titleflag = "h2"
+                telems = self.browser.find_elements_by_css_selector("li.reItem>h2>a")  # 左标大标题
+                try:  # 有可能没热点
+                    helems = self.browser.find_elements_by_css_selector("ul.list-news-recommend.clearfix>li>div.news-recommend-left>p.p-name-recommend>a")  # 右边热点标题
+                except Exception,e:
+                    pass
             elif num == 4:
-                elems = self.script.find_element_css_list("li.b_algo")
-                titleflag = "h2"
+                telems = self.browser.find_elements_by_css_selector("li.b_algo>h2>a")  # 左标大标题
+                #helems = self.script.find_element_css_list("ol.news-recommend>li>a")  # 右边热点标题 没有热点新闻项
             elif num == 5:
-                elems = self.script.find_element_css_list(
-                    "div.dd.algo.algo-sr")
+                telems = self.browser.find_elements_by_css_selector("div.dd.algo.algo-sr>a")  # 左标大标题
+                #helems = self.script.find_element_css_list("ol.news-recommend>li>a")  # 右边热点标题 没有热点新闻项
             elif num == 6:
-                elems = self.script.find_element_css_list("div.pro")
-                titleflag = "span"
+                telems = self.browser.find_elements_by_css_selector("div.pro>div>a>img")  # 左标大标题
+                # helems = self.script.find_element_css_list("ol.news-recommend>li>a")  # 右边热点标题 没有热点新闻项
             sleep(5)
+            #把大标题和热点标题存放到elems变量里
+            for a in telems:
+                if a.is_displayed() and a.text != "":
+                    elems.append(a)
+            for a in helems:
+                if a.is_displayed() and a.text != "":
+                    elems.append(a)
+            #
             if elems != None:
-                for ele in elems:
-                    title = self.script.find_elem("tag", titleflag, ele)
-                    ahref = self.script.find_elem("tag", "a", ele)
-                    print ahref
-                    if title == None or ahref == None:
-                        continue
-                    if ele.is_displayed():
-                        newsres.append(ele)
-                if len(newsres) >= 1:
-                    ranres = random.sample(newsres, 1)
+                if len(elems) >= 1:
+                    ranres = random.sample(elems, 1)
                     for ran in ranres:
                         sleep(3)
-                        if num == 4 or num == 6:
+                        if num == 6:
                             self.process_block(ran, g_step+10)
                         else:
                             self.process_block(ran, g_step)
@@ -868,20 +890,39 @@ def configdb(dbname):
     return db, logger
 
 
-def get_ip():  # 取得当前IP地址
-    url = "http://packs.6a.com/site/clientip"
-    request = urllib2.urlopen(url)
-    response = request.read()
-    return re.search('\d+\.\d+\.\d+\.\d+', response).group(0)
-
+def get_ip(db,taskid):  # 取得当前IP地址
+    try:
+        sql = "select server_id from vm_cur_task where id={0}".format(taskid)
+        res = db.select_sql(sql,"DictCursor")
+        if res == None:
+            print(u"取任务server_id出错")
+            return ""
+        if len(res) <= 0:
+            print(u"取任务server_id为空")
+            return ""
+        serverid = res[0]["server_id"]
+        sql = "select ip from vpn_status where serverid={0} and vpnstatus=1".format(serverid)
+        res = db.select_sql(sql, 'DictCursor')
+        if res == None:
+            print(u"取vpn_status的IP出错")
+            return ""
+        else:
+            return res[0]["ip"]
+    except Exception,e:
+        print(u"取IP出错")
+        return ""
 
 def write_ip_to_vm_cur_task(db, taskid):  # 写入到vm_cur_task里
-    #ip = get_ip()
-    ip = '127.0.0.1'
-    sql = "update vm_cur_task set ip='{0}' where id={1}".format(ip, taskid)
-    ret = db.execute_sql(sql)
-    if ret < 0:
-        print(u"写入运行时IP出错")
+    try:
+        ip = get_ip(db,taskid)
+        sql = "update vm_cur_task set ip='{0}' where id={1}".format(ip, taskid)
+        ret = db.execute_sql(sql)
+        if ret < 0:
+            print(u"写入运行时IP出错")
+            return -1
+        return 0
+    except Exception, e:
+        print(u"记录IP出错:" + str(e))
         return -1
     return 0
 
@@ -980,9 +1021,8 @@ def main():
     else:
         isdebug = False
 
-    init()  #配置任务
-    # try:
-    if True:
+    init() #配置任务
+    try:
         run()  #执行任务
     # except Exception,e:
     #     myprint.print_red_text(u"引擎:执行任务失败{0}".format(e))

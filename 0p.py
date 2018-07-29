@@ -5,42 +5,6 @@
 # Date              : 10.07.2018 10:54:1531191274
 # Last Modified Date: 10.07.2018 10:54:1531191274
 # Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0p.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 10.07.2018 10:20:1531189205
-# Last Modified Date: 10.07.2018 10:29:1531189784
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0p.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 10.07.2018 10:19:1531189172
-# Last Modified Date: 10.07.2018 10:19:1531189172
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0p.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 10.07.2018 09:49:1531187378
-# Last Modified Date: 10.07.2018 09:49:1531187378
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0p.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 10.07.2018 09:42:1531186922
-# Last Modified Date: 10.07.2018 09:42:1531186922
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0p.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 14.06.2018 10:43:1528944185
-# Last Modified Date: 27.06.2018 11:28:1530070087
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
-# -*- coding: utf-8 -*-
-# File              : 0p.py
-# Author            : coldplay <coldplay_gz@sina.cn>
-# Date              : 13.06.2018 14:40:1528872021
-# Last Modified Date: 14.06.2018 10:39:1528943982
-# Last Modified By  : coldplay <coldplay_gz@sina.cn>
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -52,6 +16,7 @@ from prototypecopy import prototype
 from ColorPrint import Color
 from script.script import Script
 import importlib
+from contextlib import contextmanager
 
 from time import sleep
 from dbutil import DBUtil

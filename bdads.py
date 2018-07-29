@@ -326,7 +326,7 @@ class ChinaUSearch(prototype):
             submit_button)
         step = random.randint(20, 100)
         left += step
-        top += 100
+        top += g_step-10
         pyautogui.moveTo(left, top, duration=3)
         self.click_mode.signal_pausing()
         pyautogui.click()

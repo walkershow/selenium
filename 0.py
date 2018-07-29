@@ -1024,8 +1024,8 @@ def main():
     init() #配置任务
     try:
         run()  #执行任务
-    # except Exception,e:
-    #     myprint.print_red_text(u"引擎:执行任务失败{0}".format(e))
+    except Exception,e:
+         myprint.print_red_text(u"引擎:执行任务失败{0}".format(e))
 
 
 if __name__ == "__main__":
